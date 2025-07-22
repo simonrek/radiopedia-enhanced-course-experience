@@ -8,6 +8,8 @@
 // @match       https://radiopaedia.org/courses*
 // @match       https://radiopaedia.org/courses/*
 // @grant       none
+// Built by Simon Rekanovic for Radiopaedia users as a form of appreciation for Radiopaedia's work, mission and vision. See GitHub repository for more details.
+// @author      Simon Rekanovic
 // ==/UserScript==
 
 // ========================================
