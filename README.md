@@ -123,6 +123,13 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 - **Modern JavaScript**: ES6+ with async/await patterns
 - **CSS3**: For smooth animations and modern styling
 
+### Development Dependencies
+
+- **VS Code**: Primary development environment
+- **Prettier**: Code formatting (system-wide configuration)
+- **ESLint**: Code linting and quality assurance (system-wide configuration)
+- **Git**: Version control
+
 ## 🚀 Features in Detail
 
 ### Smart Video Detection
@@ -189,6 +196,10 @@ This userscript was created with love and appreciation for **Radiopaedia** and i
 ## ⚠️ Disclaimer
 
 This is an unofficial userscript and is not affiliated with or endorsed by Radiopaedia. Use at your own discretion. Always ensure you comply with Radiopaedia's terms of service.
+
+## 🤖 Development Transparency
+
+This project was developed with the assistance of AI tools (Continue with Codestral, GitHub Copilot with Claude Sonnet 4) for code generation, debugging, and documentation. The core concept, code, feature ideas, user experience design, and final implementation decisions were driven by human creativity and "expertise" from my humble self. AI was used as a development accelerator while maintaining my oversight of the codebase quality and functionality.
 
 ---
 
