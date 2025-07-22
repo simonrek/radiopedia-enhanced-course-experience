@@ -40,6 +40,14 @@ An enhanced userscript that transforms the Radiopaedia course experience by addi
 - **Smart Scrolling**: Click any video to smoothly scroll to it on the page
 - **Active Video Highlighting**: Current video is highlighted with a blue border
 
+### 📊 **Study Analytics & Progress**
+
+- **Daily Study Counter**: Tracks videos watched and time spent each day
+- **7-Day Statistics Window**: Click the 🤓 emoji to view detailed progress analytics
+- **Visual Progress Charts**: Interactive charts showing your learning patterns
+- **Motivational Metrics**: Total videos, study time, and daily averages
+- **Video Duration Display**: Shows individual video lengths for better planning
+
 ### 🎨 **User Interface**
 
 - **Collapsible Sidebar**: Sleek, modern sidebar that slides in/out
@@ -102,11 +110,19 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 ### Video Controls
 
 - **Click video title**: Scroll to that video on the page
-- **Play/Pause**: Control video playback
+- **Play/Pause**: Control video playback with auto-unmute feature
 - **Mute/Unmute**: Toggle audio (essential for PiP mode)
 - **Speed**: Cycle through different playback speeds
 - **PiP**: Enter Picture-in-Picture mode with auto-unmute
 - **Fullscreen**: Expand video to fullscreen
+
+### Progress & Analytics
+
+- **✅ Progress**: Green checkmarks show completed videos
+- **📈 Daily Stats**: Real-time counter showing today's study progress
+- **🤓 Geek Stats**: Click the nerd emoji for detailed 7-day analytics
+- **📊 Visual Charts**: Progress bars and metrics for motivation
+- **⏱️ Time Tracking**: Automatic duration tracking for each video
 
 ### Navigation
 
@@ -148,6 +164,16 @@ The script automatically scans the page for Vimeo iframes and creates a comprehe
 - Videos are marked as "watched" when 80% completed
 - Progress is saved locally and persists across sessions
 - Visual indicators show completion status
+- Daily study statistics track videos watched and time spent
+- 7-day analytics window provides detailed learning insights
+
+### Study Analytics Dashboard
+
+- **Daily Counter**: Shows today's videos watched and total study time
+- **Geek Stats Window**: Comprehensive 7-day progress analysis
+- **Visual Progress Bars**: Chart your daily learning activity
+- **Motivational Metrics**: Track consistency and improvement over time
+- **Video Duration Info**: Plan your study sessions with accurate time estimates
 
 ### Enhanced PiP Mode
 

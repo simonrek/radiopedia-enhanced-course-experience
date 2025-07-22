@@ -29,6 +29,215 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     JSON.parse(localStorage.getItem("radiopaedia-watched-videos") || "[]")
   )
 
+  // Helper function to count current page videos
+  function getCurrentPageWatchedCount() {
+    const currentPageVideos = videos.map(v => v.id)
+    return currentPageVideos.filter(id => watchedVideos.has(id)).length
+  }
+
+  // Helper function to format duration
+  function formatDuration(seconds) {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = Math.floor(seconds % 60)
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
+  }
+
+  // Daily study tracking functions
+  function getTodayKey() {
+    return new Date().toISOString().split("T")[0] // YYYY-MM-DD format
+  }
+
+  function getTodayStats() {
+    const todayKey = getTodayKey()
+    const stats = JSON.parse(
+      localStorage.getItem("radiopaedia-daily-stats") || "{}"
+    )
+    return stats[todayKey] || { videosWatched: 0, totalTimeWatched: 0 }
+  }
+
+  function updateTodayStats(videoDuration = 0) {
+    const todayKey = getTodayKey()
+    const allStats = JSON.parse(
+      localStorage.getItem("radiopaedia-daily-stats") || "{}"
+    )
+
+    if (!allStats[todayKey]) {
+      allStats[todayKey] = { videosWatched: 0, totalTimeWatched: 0 }
+    }
+
+    allStats[todayKey].videosWatched += 1
+    allStats[todayKey].totalTimeWatched += Math.floor(videoDuration)
+
+    localStorage.setItem("radiopaedia-daily-stats", JSON.stringify(allStats))
+
+    // Update the display
+    updateDailyStatsDisplay()
+  }
+
+  function updateDailyStatsDisplay() {
+    const stats = getTodayStats()
+    const statsElement = document.querySelector("#daily-stats")
+    if (statsElement && stats.videosWatched > 0) {
+      const timeText = formatDuration(stats.totalTimeWatched)
+      statsElement.innerHTML = `📈 Today: ${stats.videosWatched} videos • ${timeText} watched <span style="cursor: pointer; color: #3498db; font-weight: bold;">🤓 stats</span>`
+      statsElement.style.display = "block"
+
+      // Add click listener to the stats element
+      statsElement.onclick = () => showStatsWindow()
+    }
+  }
+
+  function getLast7DaysStats() {
+    const allStats = JSON.parse(
+      localStorage.getItem("radiopaedia-daily-stats") || "{}"
+    )
+    const last7Days = []
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dateKey = date.toISOString().split("T")[0]
+      const dayStats = allStats[dateKey] || {
+        videosWatched: 0,
+        totalTimeWatched: 0,
+      }
+
+      last7Days.push({
+        date: dateKey,
+        dayName: date.toLocaleDateString("en-US", { weekday: "short" }),
+        ...dayStats,
+      })
+    }
+
+    return last7Days
+  }
+
+  function showStatsWindow() {
+    // Remove existing window if any
+    const existingWindow = document.querySelector("#stats-window")
+    if (existingWindow) {
+      existingWindow.remove()
+      return
+    }
+
+    const last7Days = getLast7DaysStats()
+    const totalVideos = last7Days.reduce(
+      (sum, day) => sum + day.videosWatched,
+      0
+    )
+    const totalTime = last7Days.reduce(
+      (sum, day) => sum + day.totalTimeWatched,
+      0
+    )
+    const avgPerDay = totalVideos / 7
+
+    const statsWindow = document.createElement("div")
+    statsWindow.id = "stats-window"
+    Object.assign(statsWindow.style, {
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: "400px",
+      background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
+      borderRadius: "12px",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+      zIndex: 100000,
+      color: "#ecf0f1",
+      fontFamily: "system-ui, -apple-system, sans-serif",
+    })
+
+    const maxVideos = Math.max(...last7Days.map(day => day.videosWatched), 1)
+
+    statsWindow.innerHTML = `
+      <div style="padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #3498db; padding-bottom: 15px;">
+          <h3 style="margin: 0; color: #3498db; font-size: 18px;">� Your 7-Day Study Stats</h3>
+          <button id="close-stats" style="background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 16px;">×</button>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+            <div style="background: #27ae60; padding: 10px; border-radius: 8px;">
+              <div style="font-size: 24px; font-weight: bold;">${totalVideos}</div>
+              <div style="font-size: 12px; opacity: 0.8;">Total Videos</div>
+            </div>
+            <div style="background: #e67e22; padding: 10px; border-radius: 8px;">
+              <div style="font-size: 24px; font-weight: bold;">${formatDuration(
+                totalTime
+              )}</div>
+              <div style="font-size: 12px; opacity: 0.8;">Total Time</div>
+            </div>
+            <div style="background: #9b59b6; padding: 10px; border-radius: 8px;">
+              <div style="font-size: 24px; font-weight: bold;">${avgPerDay.toFixed(
+                1
+              )}</div>
+              <div style="font-size: 12px; opacity: 0.8;">Avg/Day</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <h4 style="margin: 0 0 10px 0; color: #bdc3c7; font-size: 14px;">Daily Breakdown:</h4>
+          ${last7Days
+            .map(
+              day => `
+            <div style="display: flex; align-items: center; margin-bottom: 8px; padding: 8px; background: #34495e; border-radius: 6px;">
+              <div style="width: 40px; font-size: 12px; color: #95a5a6;">${
+                day.dayName
+              }</div>
+              <div style="flex: 1; margin: 0 10px;">
+                <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden;">
+                  <div style="height: 100%; background: linear-gradient(90deg, #3498db, #2980b9); width: ${
+                    (day.videosWatched / maxVideos) * 100
+                  }%; transition: width 0.3s ease;"></div>
+                </div>
+              </div>
+              <div style="width: 80px; text-align: right; font-size: 12px;">
+                <div style="color: #3498db; font-weight: bold;">${
+                  day.videosWatched
+                } videos</div>
+                <div style="color: #95a5a6;">${formatDuration(
+                  day.totalTimeWatched
+                )}</div>
+              </div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+
+        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #34495e;">
+          <div style="font-size: 12px; color: #95a5a6;">Keep up the great work! 🎉</div>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(statsWindow)
+
+    // Add close button functionality
+    const closeBtn = statsWindow.querySelector("#close-stats")
+    closeBtn.addEventListener("click", () => statsWindow.remove())
+
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener("click", function closeOnOutside(e) {
+        if (!statsWindow.contains(e.target)) {
+          statsWindow.remove()
+          document.removeEventListener("click", closeOnOutside)
+        }
+      })
+    }, 100)
+
+    // Close on Escape key
+    document.addEventListener("keydown", function closeOnEscape(e) {
+      if (e.key === "Escape") {
+        statsWindow.remove()
+        document.removeEventListener("keydown", closeOnEscape)
+      }
+    })
+  }
+
   // Load Vimeo Player API
   function loadVimeoSDK(cb) {
     if (window.Vimeo && window.Vimeo.Player) return cb()
@@ -95,7 +304,8 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     header.innerHTML = `
       <div style="padding: 20px; border-bottom: 2px solid #3498db; background: #2c3e50;">
         <h3 style="margin: 0; color: #ecf0f1; font-size: 18px; font-weight: bold;">📚 Course Videos</h3>
-        <p style="margin: 5px 0 10px 0; color: #bdc3c7; font-size: 12px;">${videos.length} videos found</p>
+        <p style="margin: 5px 0 5px 0; color: #bdc3c7; font-size: 12px;">${videos.length} videos found</p>
+        <p id="daily-stats" style="margin: 0 0 10px 0; color: #e67e22; font-size: 11px; font-weight: bold; display: none;"></p>
         <div style="display: flex; gap: 6px; margin-top: 10px;">
           <button id="next-lesson-btn" style="flex: 1; padding: 6px 10px; background: #27ae60; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">🚀 Next Lesson</button>
           <button id="course-overview-btn" style="flex: 1; padding: 6px 10px; background: #8e44ad; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">📋 Overview</button>
@@ -188,9 +398,11 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
           <div style="color: #ecf0f1; font-weight: bold; font-size: 14px; line-height: 1.3;">${
             video.title
           }</div>
-          <div style="color: #95a5a6; font-size: 11px; margin-top: 2px;">Video ${
-            index + 1
-          }</div>
+          <div style="color: #95a5a6; font-size: 11px; margin-top: 2px;">
+            Video ${index + 1}${
+      video.duration ? ` • ${formatDuration(video.duration)}` : ""
+    }
+          </div>
         </div>
         <div style="margin-left: 8px; font-size: 16px;">
           ${isWatched ? "✅" : "⚪"}
@@ -272,7 +484,10 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     try {
       const paused = await video.player.getPaused()
       if (paused) {
-        await video.player.play()
+        // Unmute and play
+        video.player.play()
+        await video.player.setMuted(false)
+
         button.textContent = "⏸️ Pause"
         button.style.background = "#e67e22"
       } else {
@@ -340,8 +555,18 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 
   // Mark video as watched
   function markVideoAsWatched(videoId) {
+    // Check if video was already watched to avoid double counting
+    if (watchedVideos.has(videoId)) return
+
     watchedVideos.add(videoId)
     saveWatchedVideos()
+
+    // Find the video duration for stats
+    const video = videos.find(v => v.id === videoId)
+    const videoDuration = video && video.duration ? video.duration : 0
+
+    // Update daily stats
+    updateTodayStats(videoDuration)
 
     const item = document.querySelector(`[data-video-id="${videoId}"]`)
     if (item) {
@@ -349,6 +574,15 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
       if (checkmark) {
         checkmark.textContent = "✅"
       }
+    }
+
+    // Update progress counter
+    const header = document.querySelector(
+      "#radiopaedia-sidebar h3"
+    ).nextElementSibling
+    if (header) {
+      const currentPageWatched = getCurrentPageWatchedCount()
+      header.textContent = `${videos.length} videos found • ${currentPageWatched}/${videos.length} watched`
     }
   }
 
@@ -374,9 +608,31 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
           iframe: iframe,
           player: player,
           index: index,
+          duration: null,
         }
 
         videos.push(videoObj)
+
+        // Get video duration
+        player
+          .getDuration()
+          .then(duration => {
+            videoObj.duration = duration
+            // Update the video item display if it exists
+            const item = document.querySelector(`[data-video-id="${videoId}"]`)
+            if (item) {
+              const videoInfo = item.querySelector("div div:nth-child(2)")
+              if (videoInfo) {
+                videoInfo.innerHTML = `Video ${index + 1} • ${formatDuration(
+                  duration
+                )}`
+              }
+            }
+          })
+          .catch(() => {
+            // Duration fetch failed, keep as null
+            console.log(`Failed to get duration for video ${videoId}`)
+          })
 
         // Set up event listeners for progress tracking
         player.on("timeupdate", data => {
@@ -457,6 +713,10 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 
     // Update header with actual count
     const header = sidebar.querySelector("h3").nextElementSibling
-    header.textContent = `${videos.length} videos found • ${watchedVideos.size} watched`
+    const currentPageWatched = getCurrentPageWatchedCount()
+    header.textContent = `${videos.length} videos found • ${currentPageWatched}/${videos.length} watched`
+
+    // Initialize daily stats display
+    updateDailyStatsDisplay()
   })
 })()
