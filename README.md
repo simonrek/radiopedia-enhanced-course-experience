@@ -9,6 +9,13 @@ An enhanced userscript that transforms the Radiopaedia course experience by addi
 ![Safari](https://img.shields.io/badge/Safari-Userscripts-orange.svg)
 ![Chrome](https://img.shields.io/badge/Chrome-Tampermonkey-red.svg)
 
+## 📸 Preview
+
+<div align="center">
+  <img src="assets/Radiopedia enhanced course player screen-shot.png" alt="Radiopaedia Enhanced Course Player UI" width="800"/>
+  <p><em>The enhanced video management sidebar in action on a Radiopaedia course page</em></p>
+</div>
+
 ## ✨ Features
 
 ### 🎥 **Video Management**
