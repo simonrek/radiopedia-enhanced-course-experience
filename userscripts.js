@@ -187,9 +187,16 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
                 day.dayName
               }</div>
               <div style="flex: 1; margin: 0 10px;">
-                <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden;">
+                <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 2px;">
                   <div style="height: 100%; background: linear-gradient(90deg, #3498db, #2980b9); width: ${
                     (day.videosWatched / maxVideos) * 100
+                  }%; transition: width 0.3s ease;"></div>
+                </div>
+                <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden;">
+                  <div style="height: 100%; background: linear-gradient(90deg, #e67e22, #d35400); width: ${
+                    (day.totalTimeWatched /
+                      Math.max(...last7Days.map(d => d.totalTimeWatched), 1)) *
+                    100
                   }%; transition: width 0.3s ease;"></div>
                 </div>
               </div>
@@ -197,7 +204,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
                 <div style="color: #3498db; font-weight: bold;">${
                   day.videosWatched
                 } videos</div>
-                <div style="color: #95a5a6;">${formatDuration(
+                <div style="color: #e67e22;">${formatDuration(
                   day.totalTimeWatched
                 )}</div>
               </div>
@@ -270,6 +277,25 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     }
 
     return title
+  }
+
+  // Get video title from Vimeo API (async)
+  async function getVimeoTitle(player, videoId) {
+    try {
+      const vimeoTitle = await player.getVideoTitle()
+      if (vimeoTitle && vimeoTitle.trim()) {
+        // Clean up the title by removing "from Radiopedia Events on Vimeo" suffix
+        const cleanTitle = vimeoTitle
+          .replace(/\s+from\s+Radiopedia\s+Events\s+on\s+Vimeo$/i, "")
+          .trim()
+        if (cleanTitle) {
+          return cleanTitle
+        }
+      }
+    } catch (error) {
+      console.log(`Could not get Vimeo title for video ${videoId}:`, error)
+    }
+    return null
   }
 
   // Save watched videos to localStorage
@@ -381,6 +407,12 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     item.dataset.videoId = video.id
 
     const isWatched = watchedVideos.has(video.id)
+    console.log(
+      "DEBUG: createVideoItem - videoId:",
+      video.id,
+      "isWatched:",
+      isWatched
+    )
 
     Object.assign(item.style, {
       margin: "8px 0",
@@ -395,16 +427,16 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     item.innerHTML = `
       <div style="display: flex; justify-content: between; align-items: flex-start; margin-bottom: 8px;">
         <div style="flex: 1;">
-          <div style="color: #ecf0f1; font-weight: bold; font-size: 14px; line-height: 1.3;">${
+          <div class="video-title" style="color: #ecf0f1; font-weight: bold; font-size: 14px; line-height: 1.3;">${
             video.title
           }</div>
-          <div style="color: #95a5a6; font-size: 11px; margin-top: 2px;">
+          <div class="video-info" style="color: #95a5a6; font-size: 11px; margin-top: 2px;">
             Video ${index + 1}${
       video.duration ? ` • ${formatDuration(video.duration)}` : ""
     }
           </div>
         </div>
-        <div style="margin-left: 8px; font-size: 16px;">
+        <div class="checkmark-container" style="margin-left: 8px; font-size: 16px;">
           ${isWatched ? "✅" : "⚪"}
         </div>
       </div>
@@ -569,10 +601,24 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     updateTodayStats(videoDuration)
 
     const item = document.querySelector(`[data-video-id="${videoId}"]`)
+    console.log("DEBUG: markVideoAsWatched - videoId:", videoId)
+    console.log("DEBUG: markVideoAsWatched - found item:", item)
     if (item) {
-      const checkmark = item.querySelector("div:last-child div:last-child")
+      const checkmark = item.querySelector(".checkmark-container")
+      console.log(
+        "DEBUG: markVideoAsWatched - found checkmark element:",
+        checkmark
+      )
+      console.log(
+        "DEBUG: markVideoAsWatched - checkmark current content:",
+        checkmark ? checkmark.textContent : "null"
+      )
       if (checkmark) {
         checkmark.textContent = "✅"
+        console.log(
+          "DEBUG: markVideoAsWatched - checkmark updated to:",
+          checkmark.textContent
+        )
       }
     }
 
@@ -621,7 +667,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
             // Update the video item display if it exists
             const item = document.querySelector(`[data-video-id="${videoId}"]`)
             if (item) {
-              const videoInfo = item.querySelector("div div:nth-child(2)")
+              const videoInfo = item.querySelector(".video-info")
               if (videoInfo) {
                 videoInfo.innerHTML = `Video ${index + 1} • ${formatDuration(
                   duration
@@ -633,6 +679,25 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
             // Duration fetch failed, keep as null
             console.log(`Failed to get duration for video ${videoId}`)
           })
+
+        // Try to get the Vimeo title asynchronously and update the display (non-blocking)
+        setTimeout(() => {
+          getVimeoTitle(player, videoId).then(vimeoTitle => {
+            if (vimeoTitle) {
+              videoObj.title = vimeoTitle
+              // Update the video item display if it exists
+              const item = document.querySelector(
+                `[data-video-id="${videoId}"]`
+              )
+              if (item) {
+                const titleElement = item.querySelector(".video-title")
+                if (titleElement) {
+                  titleElement.textContent = vimeoTitle
+                }
+              }
+            }
+          })
+        }, 100)
 
         // Set up event listeners for progress tracking
         player.on("timeupdate", data => {
