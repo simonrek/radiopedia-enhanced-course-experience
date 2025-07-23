@@ -16,7 +16,7 @@
 // 🔧 CUSTOMIZATION SETTINGS
 // ========================================
 const AUTOPLAY_FIRST_VIDEO = true // Set to true to autoplay the first video when page loads
-const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when page loads
+const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when page loads
 // ========================================
 
 ;(function () {
@@ -28,6 +28,20 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
   let watchedVideos = new Set(
     JSON.parse(localStorage.getItem("radiopaedia-watched-videos") || "[]")
   )
+
+  // Enhanced tracking for detailed statistics
+  let videoProgress = JSON.parse(
+    localStorage.getItem("radiopaedia-video-progress") || "{}"
+  )
+  let videoWatchCounts = JSON.parse(
+    localStorage.getItem("radiopaedia-video-watch-counts") || "{}"
+  )
+  let videoTimeSpent = JSON.parse(
+    localStorage.getItem("radiopaedia-video-time-spent") || "{}"
+  )
+
+  // Track which videos have been marked as watched in this session to prevent duplicate stats
+  let sessionWatchedVideos = new Set()
 
   // Helper function to count current page videos
   function getCurrentPageWatchedCount() {
@@ -42,6 +56,63 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
   }
 
+  // Data management functions
+  function pruneOldData(maxDays = 7) {
+    const allStats = JSON.parse(
+      localStorage.getItem("radiopaedia-daily-stats") || "{}"
+    )
+    const today = new Date()
+    const validKeys = []
+
+    for (let i = 0; i < maxDays; i++) {
+      const date = new Date()
+      date.setDate(today.getDate() - i)
+      validKeys.push(date.toISOString().split("T")[0])
+    }
+
+    // Keep only last 7 days of stats
+    Object.keys(allStats).forEach(key => {
+      if (!validKeys.includes(key)) delete allStats[key]
+    })
+
+    localStorage.setItem("radiopaedia-daily-stats", JSON.stringify(allStats))
+  }
+
+  function saveVideoData() {
+    localStorage.setItem(
+      "radiopaedia-watched-videos",
+      JSON.stringify([...watchedVideos])
+    )
+    localStorage.setItem(
+      "radiopaedia-video-progress",
+      JSON.stringify(videoProgress)
+    )
+    localStorage.setItem(
+      "radiopaedia-video-watch-counts",
+      JSON.stringify(videoWatchCounts)
+    )
+    localStorage.setItem(
+      "radiopaedia-video-time-spent",
+      JSON.stringify(videoTimeSpent)
+    )
+  }
+
+  function trackVideoTime(videoId, timeWatched) {
+    if (!videoTimeSpent[videoId]) {
+      videoTimeSpent[videoId] = 0
+    }
+    videoTimeSpent[videoId] += timeWatched
+    saveVideoData()
+  }
+
+  function incrementVideoWatchCount(videoId) {
+    if (!videoWatchCounts[videoId]) {
+      videoWatchCounts[videoId] = 0
+    }
+    videoWatchCounts[videoId] += 1
+    saveVideoData()
+  }
+
   // Daily study tracking functions
   function getTodayKey() {
     return new Date().toISOString().split("T")[0] // YYYY-MM-DD format
@@ -52,7 +123,13 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     const stats = JSON.parse(
       localStorage.getItem("radiopaedia-daily-stats") || "{}"
     )
-    return stats[todayKey] || { videosWatched: 0, totalTimeWatched: 0 }
+    return (
+      stats[todayKey] || {
+        videosWatched: 0,
+        totalTimeWatched: 0,
+        uniqueVideosWatched: 0,
+      }
+    )
   }
 
   function updateTodayStats(videoDuration = 0) {
@@ -62,7 +139,11 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     )
 
     if (!allStats[todayKey]) {
-      allStats[todayKey] = { videosWatched: 0, totalTimeWatched: 0 }
+      allStats[todayKey] = {
+        videosWatched: 0,
+        totalTimeWatched: 0,
+        uniqueVideosWatched: 0,
+      }
     }
 
     allStats[todayKey].videosWatched += 1
@@ -72,6 +153,28 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 
     // Update the display
     updateDailyStatsDisplay()
+
+    // Prune old data every time we update stats
+    pruneOldData()
+  }
+
+  function updateTodayUniqueVideoStats() {
+    const todayKey = getTodayKey()
+    const allStats = JSON.parse(
+      localStorage.getItem("radiopaedia-daily-stats") || "{}"
+    )
+
+    if (!allStats[todayKey]) {
+      allStats[todayKey] = {
+        videosWatched: 0,
+        totalTimeWatched: 0,
+        uniqueVideosWatched: 0,
+      }
+    }
+
+    allStats[todayKey].uniqueVideosWatched += 1
+
+    localStorage.setItem("radiopaedia-daily-stats", JSON.stringify(allStats))
   }
 
   function updateDailyStatsDisplay() {
@@ -97,15 +200,13 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
       const date = new Date()
       date.setDate(date.getDate() - i)
       const dateKey = date.toISOString().split("T")[0]
-      const dayStats = allStats[dateKey] || {
-        videosWatched: 0,
-        totalTimeWatched: 0,
-      }
-
+      const rawStats = allStats[dateKey] || {}
       last7Days.push({
         date: dateKey,
         dayName: date.toLocaleDateString("en-US", { weekday: "short" }),
-        ...dayStats,
+        videosWatched: rawStats.videosWatched || 0,
+        totalTimeWatched: rawStats.totalTimeWatched || 0,
+        uniqueVideosWatched: rawStats.uniqueVideosWatched || 0,
       })
     }
 
@@ -125,11 +226,14 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
       (sum, day) => sum + day.videosWatched,
       0
     )
+    const totalUniqueVideos = last7Days.reduce(
+      (sum, day) => sum + day.uniqueVideosWatched,
+      0
+    )
     const totalTime = last7Days.reduce(
       (sum, day) => sum + day.totalTimeWatched,
       0
     )
-    const avgPerDay = totalVideos / 7
 
     const statsWindow = document.createElement("div")
     statsWindow.id = "stats-window"
@@ -152,28 +256,27 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     statsWindow.innerHTML = `
       <div style="padding: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #3498db; padding-bottom: 15px;">
-          <h3 style="margin: 0; color: #3498db; font-size: 18px;">� Your 7-Day Study Stats</h3>
+          <h3 style="margin: 0; color: #3498db; font-size: 18px;">📊 Your 7-Day Study Stats</h3>
           <button id="close-stats" style="background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 16px;">×</button>
         </div>
         
         <div style="margin-bottom: 20px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center;">
             <div style="background: #27ae60; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 24px; font-weight: bold;">${totalVideos}</div>
-              <div style="font-size: 12px; opacity: 0.8;">Total Videos</div>
+              <div style="font-size: 20px; font-weight: bold;">${totalVideos}</div>
+              <div style="font-size: 10px; opacity: 0.8;">Total Views</div>
+            </div>
+            <div style="background: #3498db; padding: 10px; border-radius: 8px;">
+              <div style="font-size: 20px; font-weight: bold;">${totalUniqueVideos}</div>
+              <div style="font-size: 10px; opacity: 0.8;">Unique Videos</div>
             </div>
             <div style="background: #e67e22; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 24px; font-weight: bold;">${formatDuration(
+              <div style="font-size: 20px; font-weight: bold;">${formatDuration(
                 totalTime
               )}</div>
-              <div style="font-size: 12px; opacity: 0.8;">Total Time</div>
+              <div style="font-size: 10px; opacity: 0.8;">Total Time</div>
             </div>
-            <div style="background: #9b59b6; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 24px; font-weight: bold;">${avgPerDay.toFixed(
-                1
-              )}</div>
-              <div style="font-size: 12px; opacity: 0.8;">Avg/Day</div>
-            </div>
+         
           </div>
         </div>
 
@@ -203,7 +306,10 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
               <div style="width: 80px; text-align: right; font-size: 12px;">
                 <div style="color: #3498db; font-weight: bold;">${
                   day.videosWatched
-                } videos</div>
+                } views</div>
+                <div style="color: #27ae60; font-size: 10px;">${
+                  day.uniqueVideosWatched
+                } unique</div>
                 <div style="color: #e67e22;">${formatDuration(
                   day.totalTimeWatched
                 )}</div>
@@ -407,12 +513,6 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
     item.dataset.videoId = video.id
 
     const isWatched = watchedVideos.has(video.id)
-    console.log(
-      "DEBUG: createVideoItem - videoId:",
-      video.id,
-      "isWatched:",
-      isWatched
-    )
 
     Object.assign(item.style, {
       margin: "8px 0",
@@ -587,53 +687,63 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 
   // Mark video as watched
   function markVideoAsWatched(videoId) {
-    // Check if video was already watched to avoid double counting
-    if (watchedVideos.has(videoId)) return
+    // Prevent duplicate stats counting in the same session
+    if (sessionWatchedVideos.has(videoId)) {
+      return
+    }
 
-    watchedVideos.add(videoId)
-    saveWatchedVideos()
+    // Mark as counted in this session
+    sessionWatchedVideos.add(videoId)
+
+    // Always increment watch count for statistics (allows multiple views)
+    incrementVideoWatchCount(videoId)
 
     // Find the video duration for stats
     const video = videos.find(v => v.id === videoId)
     const videoDuration = video && video.duration ? video.duration : 0
 
-    // Update daily stats
+    // Update daily stats (this counts every view)
     updateTodayStats(videoDuration)
 
-    const item = document.querySelector(`[data-video-id="${videoId}"]`)
-    console.log("DEBUG: markVideoAsWatched - videoId:", videoId)
-    console.log("DEBUG: markVideoAsWatched - found item:", item)
-    if (item) {
-      const checkmark = item.querySelector(".checkmark-container")
-      console.log(
-        "DEBUG: markVideoAsWatched - found checkmark element:",
-        checkmark
-      )
-      console.log(
-        "DEBUG: markVideoAsWatched - checkmark current content:",
-        checkmark ? checkmark.textContent : "null"
-      )
-      if (checkmark) {
-        checkmark.textContent = "✅"
-        console.log(
-          "DEBUG: markVideoAsWatched - checkmark updated to:",
-          checkmark.textContent
-        )
-      }
-    }
+    // Check if video was already marked as "watched" to avoid double marking in UI
+    const wasAlreadyWatched = watchedVideos.has(videoId)
 
-    // Update progress counter
-    const header = document.querySelector(
-      "#radiopaedia-sidebar h3"
-    ).nextElementSibling
-    if (header) {
-      const currentPageWatched = getCurrentPageWatchedCount()
-      header.textContent = `${videos.length} videos found • ${currentPageWatched}/${videos.length} watched`
+    if (!wasAlreadyWatched) {
+      // First time marking this video as watched
+      watchedVideos.add(videoId)
+      saveWatchedVideos()
+
+      // Update unique video count for today
+      updateTodayUniqueVideoStats()
+
+      // Update UI to show checkmark
+      const item = document.querySelector(`[data-video-id="${videoId}"]`)
+      if (item) {
+        const checkmark = item.querySelector(".checkmark-container")
+        if (checkmark) {
+          checkmark.textContent = "✅"
+        }
+      }
+
+      // Update progress counter
+      const header = document.querySelector(
+        "#radiopaedia-sidebar h3"
+      ).nextElementSibling
+      if (header) {
+        const currentPageWatched = getCurrentPageWatchedCount()
+        header.textContent = `${videos.length} videos found • ${currentPageWatched}/${videos.length} watched`
+      }
     }
   }
 
   // Initialize the enhanced course tool
   loadVimeoSDK(() => {
+    // Prune old data on startup
+    pruneOldData()
+
+    // Reset session tracking but preserve already watched videos from localStorage
+    sessionWatchedVideos.clear()
+
     // Find all video iframes
     const iframes = document.querySelectorAll(
       'iframe[src*="player.vimeo.com/video/"]'
@@ -701,8 +811,23 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 
         // Set up event listeners for progress tracking
         player.on("timeupdate", data => {
-          // Mark as watched when 80% completed
-          if (data.percent > 0.8) {
+          // Track time spent watching
+          const currentTime = data.seconds
+          if (!videoProgress[videoId]) {
+            videoProgress[videoId] = { lastTime: currentTime, totalWatched: 0 }
+          }
+
+          const timeDiff = Math.abs(
+            currentTime - videoProgress[videoId].lastTime
+          )
+          // Only count if time difference is reasonable (1-5 seconds to avoid seeking)
+          if (timeDiff >= 1 && timeDiff <= 5) {
+            trackVideoTime(videoId, timeDiff)
+          }
+          videoProgress[videoId].lastTime = currentTime
+
+          // Mark as watched when 80% completed (only once per session)
+          if (data.percent > 0.8 && !sessionWatchedVideos.has(videoId)) {
             markVideoAsWatched(videoId)
           }
         })

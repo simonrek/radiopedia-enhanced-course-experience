@@ -47,6 +47,7 @@ An enhanced userscript that transforms the Radiopaedia course experience by addi
 - **Visual Progress Charts**: Interactive charts showing your learning patterns
 - **Motivational Metrics**: Total videos, study time, and daily averages
 - **Video Duration Display**: Shows individual video lengths for better planning
+- **Robust Stats**: If you skip a day, your analytics will show zero for that day and never break or show errors. Progress tracking and statistics are always accurate, regardless of your study schedule.
 
 ### 🎨 **User Interface**
 
@@ -186,6 +187,13 @@ The script automatically scans the page for Vimeo iframes and creates a comprehe
 - Next lesson button increments page numbers automatically
 - Course overview jumps to the existing sidebar content
 - Smooth scrolling for better user experience
+
+## 🔒 Privacy & Data
+
+- All progress tracking and analytics are stored locally in your browser using localStorage.
+- No data is ever sent, transmitted, or shared outside your browser.
+- The userscript does not collect, transmit, or access any personal data from Radiopaedia or any other website.
+- Your study history and statistics remain private and are never uploaded or shared.
 
 ## 🐛 Known Issues & Limitations
 
