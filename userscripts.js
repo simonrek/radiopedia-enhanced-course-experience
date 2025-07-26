@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name        Radiopaedia: Course Sidebar with Video Manager
 // @namespace   https://github.com/simonrek/radiopedia-enhanced-course-experience
-// @version     3.1.0
+// @version     3.1.2
 // @updateURL   https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.meta.js
 // @downloadURL https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.user.js
 // @description Enhanced course tool with sidebar listing all videos, progress tracking, and individual video controls
@@ -68,6 +68,22 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = Math.floor(seconds % 60)
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
+  }
+
+  // Enhanced function to format duration with hours for better readability
+  function formatTimeWithHours(seconds) {
+    if (seconds < 3600) {
+      // Less than 60 minutes, use standard format
+      return formatDuration(seconds)
+    }
+
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+
+    if (minutes === 0) {
+      return `${hours} h`
+    }
+    return `${hours} h ${minutes} min`
   }
 
   // Data management functions
@@ -146,6 +162,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         videosWatched: 0,
         totalTimeWatched: 0,
         uniqueVideosWatched: 0,
+        casesViewed: 0,
       }
     )
   }
@@ -161,6 +178,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         videosWatched: 0,
         totalTimeWatched: 0,
         uniqueVideosWatched: 0,
+        casesViewed: 0,
       }
     }
 
@@ -187,6 +205,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         videosWatched: 0,
         totalTimeWatched: 0,
         uniqueVideosWatched: 0,
+        casesViewed: 0,
       }
     }
 
@@ -195,12 +214,45 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     localStorage.setItem("radiopaedia-daily-stats", JSON.stringify(allStats))
   }
 
+  // Case study tracking function - only called when case is marked as viewed
+  function updateTodayCaseStats() {
+    const todayKey = getTodayKey()
+    const allStats = JSON.parse(
+      localStorage.getItem("radiopaedia-daily-stats") || "{}"
+    )
+
+    if (!allStats[todayKey]) {
+      allStats[todayKey] = {
+        videosWatched: 0,
+        totalTimeWatched: 0,
+        uniqueVideosWatched: 0,
+        casesViewed: 0,
+      }
+    }
+
+    allStats[todayKey].casesViewed += 1
+
+    localStorage.setItem("radiopaedia-daily-stats", JSON.stringify(allStats))
+  }
+
   function updateDailyStatsDisplay() {
     const stats = getTodayStats()
     const statsElement = document.querySelector("#daily-stats")
-    if (statsElement && stats.videosWatched > 0) {
-      const timeText = formatDuration(stats.totalTimeWatched)
-      statsElement.innerHTML = `📈 Today: ${stats.videosWatched} videos • ${timeText} watched <span style="cursor: pointer; color: #3498db; font-weight: bold;">🤓 stats</span>`
+    if (statsElement && (stats.videosWatched > 0 || stats.casesViewed > 0)) {
+      const timeText = formatTimeWithHours(stats.totalTimeWatched)
+      const parts = []
+
+      if (stats.videosWatched > 0) {
+        parts.push(`${stats.videosWatched} videos`)
+      }
+      if (stats.casesViewed > 0) {
+        parts.push(`${stats.casesViewed} cases`)
+      }
+
+      const content = parts.join(" • ")
+      statsElement.innerHTML = `📈 Today: ${content}${
+        stats.videosWatched > 0 ? ` • ${timeText} watched` : ""
+      } <span style="cursor: pointer; color: #3498db; font-weight: bold;">🤓 stats</span>`
       statsElement.style.display = "block"
 
       // Add click listener to the stats element
@@ -225,6 +277,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         videosWatched: rawStats.videosWatched || 0,
         totalTimeWatched: rawStats.totalTimeWatched || 0,
         uniqueVideosWatched: rawStats.uniqueVideosWatched || 0,
+        casesViewed: rawStats.casesViewed || 0,
       })
     }
 
@@ -252,6 +305,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       (sum, day) => sum + day.totalTimeWatched,
       0
     )
+    const totalCases = last7Days.reduce((sum, day) => sum + day.casesViewed, 0)
 
     const statsWindow = document.createElement("div")
     statsWindow.id = "stats-window"
@@ -270,6 +324,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     })
 
     const maxVideos = Math.max(...last7Days.map(day => day.videosWatched), 1)
+    const maxCases = Math.max(...last7Days.map(day => day.casesViewed), 1)
 
     statsWindow.innerHTML = `
       <div style="padding: 20px;">
@@ -279,22 +334,25 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         </div>
         
         <div style="margin-bottom: 20px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
             <div style="background: #27ae60; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 20px; font-weight: bold;">${totalVideos}</div>
-              <div style="font-size: 10px; opacity: 0.8;">Total Views</div>
+              <div style="font-size: 18px; font-weight: bold;">${totalVideos}</div>
+              <div style="font-size: 9px; opacity: 0.8;">Video Views</div>
             </div>
             <div style="background: #3498db; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 20px; font-weight: bold;">${totalUniqueVideos}</div>
-              <div style="font-size: 10px; opacity: 0.8;">Unique Videos</div>
+              <div style="font-size: 18px; font-weight: bold;">${totalUniqueVideos}</div>
+              <div style="font-size: 9px; opacity: 0.8;">Unique Videos</div>
             </div>
             <div style="background: #e67e22; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 20px; font-weight: bold;">${formatDuration(
+              <div style="font-size: 18px; font-weight: bold;">${formatTimeWithHours(
                 totalTime
               )}</div>
-              <div style="font-size: 10px; opacity: 0.8;">Total Time</div>
+              <div style="font-size: 9px; opacity: 0.8;">Watch Time</div>
             </div>
-         
+            <div style="background: #9b59b6; padding: 10px; border-radius: 8px;">
+              <div style="font-size: 18px; font-weight: bold;">${totalCases}</div>
+              <div style="font-size: 9px; opacity: 0.8;">Cases Viewed</div>
+            </div>
           </div>
         </div>
 
@@ -304,33 +362,41 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
             .map(
               day => `
             <div style="display: flex; align-items: center; margin-bottom: 8px; padding: 8px; background: #34495e; border-radius: 6px;">
-              <div style="width: 40px; font-size: 12px; color: #95a5a6;">${
+              <div style="width: 35px; font-size: 11px; color: #95a5a6;">${
                 day.dayName
               }</div>
-              <div style="flex: 1; margin: 0 10px;">
-                <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 2px;">
+              <div style="flex: 1; margin: 0 8px;">
+                <div style="background: #2c3e50; height: 16px; border-radius: 8px; overflow: hidden; margin-bottom: 2px;">
                   <div style="height: 100%; background: linear-gradient(90deg, #3498db, #2980b9); width: ${
                     (day.videosWatched / maxVideos) * 100
                   }%; transition: width 0.3s ease;"></div>
                 </div>
-                <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden;">
+                <div style="background: #2c3e50; height: 16px; border-radius: 8px; overflow: hidden; margin-bottom: 2px;">
                   <div style="height: 100%; background: linear-gradient(90deg, #e67e22, #d35400); width: ${
                     (day.totalTimeWatched /
                       Math.max(...last7Days.map(d => d.totalTimeWatched), 1)) *
                     100
                   }%; transition: width 0.3s ease;"></div>
                 </div>
+                <div style="background: #2c3e50; height: 16px; border-radius: 8px; overflow: hidden;">
+                  <div style="height: 100%; background: linear-gradient(90deg, #9b59b6, #8e44ad); width: ${
+                    (day.casesViewed / maxCases) * 100
+                  }%; transition: width 0.3s ease;"></div>
+                </div>
               </div>
-              <div style="width: 80px; text-align: right; font-size: 12px;">
+              <div style="width: 80px; text-align: right; font-size: 10px;">
                 <div style="color: #3498db; font-weight: bold;">${
                   day.videosWatched
-                } views</div>
-                <div style="color: #27ae60; font-size: 10px;">${
+                } videos</div>
+                <div style="color: #27ae60; font-size: 9px;">${
                   day.uniqueVideosWatched
                 } unique</div>
-                <div style="color: #e67e22;">${formatDuration(
+                <div style="color: #e67e22;">${formatTimeWithHours(
                   day.totalTimeWatched
                 )}</div>
+                <div style="color: #9b59b6; font-weight: bold;">${
+                  day.casesViewed
+                } cases</div>
               </div>
             </div>
           `
@@ -749,6 +815,10 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       if (checkmark) {
         checkmark.textContent = "✅"
       }
+
+      // Track case statistics only when marking as viewed
+      updateTodayCaseStats()
+      updateDailyStatsDisplay()
     }
 
     saveVideoData() // Also saves case data
