@@ -2,14 +2,17 @@
 
 // ==UserScript==
 // @name        Radiopaedia: Course Sidebar with Video Manager
-// @namespace   com.yourns.radiopaedia-course-tool
+// @namespace   https://github.com/simonrek/radiopedia-enhanced-course-experience
 // @version     3.0
+// @updateURL   https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.meta.js
+// @downloadURL https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.user.js
 // @description Enhanced course tool with sidebar listing all videos, progress tracking, and individual video controls
 // @match       https://radiopaedia.org/courses*
 // @match       https://radiopaedia.org/courses/*
 // @grant       none
 // Built by Simon Rekanovic for Radiopaedia users as a form of appreciation for Radiopaedia's work, mission and vision. See GitHub repository for more details.
 // @author      Simon Rekanovic
+// @date        2024-07-25
 // ==/UserScript==
 
 // ========================================
@@ -846,8 +849,11 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
 
         // Autoplay first video if enabled
         if (AUTOPLAY_FIRST_VIDEO && index === 0) {
-          player.setMuted(false).catch(() => {})
-          player.play().catch(() => {})
+          // Play first, then unmute for reliability
+          player
+            .play()
+            .then(() => player.setMuted(false))
+            .catch(() => {})
         }
 
         // Initial video setup
