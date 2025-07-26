@@ -10,14 +10,50 @@ An advanced userscript that revolutionizes the Radiopaedia learning experience w
 ![Chrome](https://img.shields.io/badge/Chrome-Tampermonkey-red.svg)
 ![Auto-Update](https://img.shields.io/badge/Auto--Update-Enabled-green.svg)
 
+## Quick Start
+
+**Ready to get started?** 👉 **[📥 Installation Guide](INSTALL.md)** - Complete setup instructions for all browsers
+
+## 📋 Table of Contents
+
+- [�📸 Preview](#-preview)
+- [✨ What's New in v3.1.4](#-whats-new-in-v314)
+- [🎯 Features Overview](#-features-overview)
+- [🎮 How to Use](#-how-to-use)
+- [⚙️ Configuration](#️-configuration)
+- [🔧 Technical Details](#-technical-details)
+- [🔒 Privacy & Security](#-privacy--security)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [🤝 Contributing](#-contributing)
+- [📝 License](#-license)
+- [👨‍💻 Author](#-author)
+
 ## 📸 Preview
 
 <div align="center">
-  <img src="assets/Radiopedia enhanced course player screen-shot.png" alt="Radiopaedia Enhanced Course Player UI" width="800"/>
+  <img src="assets/Radiopedia enhanced course player screen v3.1 screen-shot" alt="Radiopaedia Enhanced Course Player UI" width="600"/>
   <p><em>The enhanced video management sidebar in action on a Radiopaedia course page</em></p>
 </div>
 
-## ✨ Enhanced Features
+## ✨ What's New in v3.1.4
+
+### 🎉 Latest Enhancements
+
+- **🔥 Enhanced Statistics System**: Completely rebuilt tracking with real-time case and video monitoring
+- **📊 Prominent Stats Display**: Always-visible statistics section at bottom of page with overlay modal
+- **🎯 Dynamic Page Titles**: Intelligent title detection from reliable sources (no more user names!)
+- **⏱️ Improved Time Formatting**: Consistent hours:minutes and minutes:seconds display
+- **🎨 Advanced UI Design**: Gradient backgrounds, overlay effects, and modern visual aesthetics
+- **🔄 Auto-Update Integration**: Seamless GitHub-powered update system
+
+### 🚀 Previous Major Features
+
+- **📑 Tabbed Interface**: Videos and Cases organized in intuitive tabs
+- **📋 Comprehensive Case Tracking**: Full integration with Radiopaedia case studies
+- **🎮 Enhanced Video Controls**: Professional-grade video management system
+- **💾 Persistent Data Storage**: Robust localStorage implementation with backup/recovery
+
+## 🎯 Features Overview
 
 ### 🧭 **Smart Course Navigation**
 
@@ -47,58 +83,7 @@ An advanced userscript that revolutionizes the Radiopaedia learning experience w
 - **Version Synchronization**: Always stay current with the latest features and improvements
 - **Zero Maintenance**: Set it once and enjoy continuous improvements
 
-## 🚀 Quick Start
-
-Ready to enhance your Radiopaedia learning experience?
-
-👉 **[Complete Installation Guide](INSTALL.md)** - Step-by-step instructions for all browsers
-
-### What You'll Get
-
-1. **Enhanced sidebar** with video and case management
-2. **Real-time statistics** tracking your daily progress
-3. **Auto-update system** for seamless improvements
-4. **Professional video controls** with PiP and speed control
-
-> **💡 Pro Tip**: The auto-update system ensures you always have the latest features!
-
-## ⚙️ Advanced Configuration
-
-The script includes easy-to-modify settings for personalized experience:
-
-```javascript
-// ========================================
-// 🔧 CUSTOMIZATION SETTINGS
-// ========================================
-const AUTOPLAY_FIRST_VIDEO = true // Set to true to autoplay the first video when page loads
-const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when page loads
-// ========================================
-```
-
-### Available Settings
-
-- **AUTOPLAY_FIRST_VIDEO**: Controls automatic video playback when entering a course
-- **SIDEBAR_OPEN_BY_DEFAULT**: Determines initial sidebar visibility state
-
-### Auto-Update Configuration
-
-The script automatically updates itself using the metadata file (`userscripts.meta.js`). This ensures:
-
-- ✅ Latest features and bug fixes
-- ✅ Compatibility with Radiopaedia changes
-- ✅ Enhanced security and performance
-- ✅ New functionality delivered seamlessly
-
-> **Note**: Auto-updates respect your custom settings and preserve all stored data.
-
-### Customization Options:
-
-| Setting                   | Default | Description                                                         |
-| ------------------------- | ------- | ------------------------------------------------------------------- |
-| `AUTOPLAY_FIRST_VIDEO`    | `true`  | Automatically plays and unmutes the first video when the page loads |
-| `SIDEBAR_OPEN_BY_DEFAULT` | `false` | Opens the sidebar automatically when the page loads                 |
-
-## 🎯 How to Use
+## � How to Use
 
 ### Getting Started
 
@@ -158,9 +143,37 @@ The script automatically updates itself using the metadata file (`userscripts.me
 - **🚀 Next Lesson**: Seamlessly move to the next course section
 - **📋 Course Overview**: Quick access to complete course content
 - **Auto-Save**: All progress automatically preserved without user intervention
-- **✅ Progress**: Green checkmarks show completed videos
 
-## 🔧 Technical Details & Architecture
+## ⚙️ Configuration
+
+The script includes easy-to-modify settings for personalized experience:
+
+```javascript
+// ========================================
+// 🔧 CUSTOMIZATION SETTINGS
+// ========================================
+const AUTOPLAY_FIRST_VIDEO = true // Set to true to autoplay the first video when page loads
+const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when page loads
+// ========================================
+```
+
+### Available Settings
+
+- **AUTOPLAY_FIRST_VIDEO**: Controls automatic video playback when entering a course
+- **SIDEBAR_OPEN_BY_DEFAULT**: Determines initial sidebar visibility state
+
+### Auto-Update Configuration
+
+The script automatically updates itself using the metadata file (`userscripts.meta.js`). This ensures:
+
+- ✅ Latest features and bug fixes
+- ✅ Compatibility with Radiopaedia changes
+- ✅ Enhanced security and performance
+- ✅ New functionality delivered seamlessly
+
+> **Note**: Auto-updates respect your custom settings and preserve all stored data.
+
+## 🔧 Technical Details
 
 ### Platform Compatibility
 
@@ -180,13 +193,6 @@ The script automatically updates itself using the metadata file (`userscripts.me
 - **localStorage API**: Sophisticated data persistence with automatic backup and recovery
 - **GitHub Integration**: Auto-update system with metadata synchronization
 
-### Development & Deployment
-
-- **Version Control**: Git-based development with semantic versioning
-- **Auto-Update System**: GitHub-powered delivery with metadata validation
-- **Code Quality**: ESLint and Prettier integration for professional standards
-- **Testing**: Cross-browser compatibility testing on multiple platforms
-
 ### Performance Optimizations
 
 - **Efficient DOM Manipulation**: Minimal reflows and optimized rendering
@@ -194,71 +200,7 @@ The script automatically updates itself using the metadata file (`userscripts.me
 - **Memory Management**: Proper cleanup and resource management
 - **Async Operations**: Non-blocking operations for smooth user experience
 
-## 🚀 Version History & Evolution
-
-### Smart Video Detection
-
-The script automatically scans the page for Vimeo iframes and creates a comprehensive video management interface.
-
-### Progress Tracking
-
-- Videos are marked as "watched" when 80% completed
-- Progress is saved locally and persists across sessions
-- Visual indicators show completion status
-- Daily study statistics track videos watched and time spent
-- 7-day analytics window provides detailed learning insights
-
-### Current Version: 3.1.4 - Major Feature Release
-
-#### ✨ Latest Enhancements (v3.1.4)
-
-- **Enhanced Statistics System**: Completely rebuilt tracking with real-time case and video monitoring
-- **Prominent Stats Display**: Always-visible statistics section at bottom of page with overlay modal
-- **Dynamic Page Titles**: Intelligent title detection from reliable sources (no more user names!)
-- **Improved Time Formatting**: Consistent hours:minutes and minutes:seconds display
-- **Advanced UI Design**: Gradient backgrounds, overlay effects, and modern visual aesthetics
-- **Auto-Update Integration**: Seamless GitHub-powered update system
-
-#### Previous Major Features
-
-- **Tabbed Interface**: Videos and Cases organized in intuitive tabs
-- **Comprehensive Case Tracking**: Full integration with Radiopaedia case studies
-- **Enhanced Video Controls**: Professional-grade video management system
-- **Persistent Data Storage**: Robust localStorage implementation with backup/recovery
-
-### Feature Deep Dive
-
-#### Advanced Analytics Dashboard
-
-- **Real-Time Updates**: Statistics refresh instantly as you interact with content
-- **Dual Content Tracking**: Unified system for both videos and case studies
-- **Intelligent Time Calculation**: Precise tracking with smart formatting algorithms
-- **Visual Enhancement**: Eye-catching design with gradient overlays and blur effects
-- **Persistent Storage**: All data automatically saved and restored across browser sessions
-
-#### Smart Content Detection
-
-- **Dynamic Page Recognition**: Automatically adapts to current course section
-- **Reliable Title Extraction**: Filters content to avoid user names and irrelevant data
-- **Real-Time Synchronization**: Updates instantly as you navigate through course content
-- **Fallback Systems**: Multiple detection methods ensure consistent functionality
-
-#### Enhanced Video Experience
-
-- **Professional Controls**: Full Vimeo Player API integration for reliable operation
-- **PiP Enhancement**: Automatic unmuting and play state management for Picture-in-Picture
-- **Speed Control**: Smooth playback speed cycling from 0.5x to 2x
-- **Progress Synchronization**: Visual completion indicators with real-time updates
-- **Seamless Navigation**: Click-to-scroll functionality for instant video access
-
-#### Case Study Integration
-
-- **Unified Tracking**: Cases and videos managed in one comprehensive system
-- **Progress Indicators**: Clear visual feedback for completed case reviews
-- **Smart Detection**: Automatic recognition when cases are accessed and reviewed
-- **Analytics Integration**: Case study time included in daily statistics
-
-## 🔒 Privacy & Data Security
+## Privacy & Security
 
 - **Local Storage Only**: All progress tracking and analytics stored locally in your browser using localStorage
 - **Zero Data Transmission**: No data ever sent, transmitted, or shared outside your browser
@@ -266,7 +208,7 @@ The script automatically scans the page for Vimeo iframes and creates a comprehe
 - **Complete Control**: Your study history and statistics remain private and under your control
 - **Auto-Update Safety**: Update system only retrieves code updates, never accesses your data
 
-## 🐛 Known Issues & Troubleshooting
+## 🐛 Troubleshooting
 
 ### Current Limitations
 
@@ -274,14 +216,14 @@ The script automatically scans the page for Vimeo iframes and creates a comprehe
 - **Course Pages Only**: Designed specifically for `radiopaedia.org/courses*` pages
 - **Modern Browser Requirement**: Requires ES6+ support for full functionality
 
-### Troubleshooting
+### Common Issues
 
 - **Script Not Loading**: Ensure userscript manager is enabled and script is active
 - **Statistics Not Updating**: Check browser console for any localStorage errors
 - **Auto-Update Issues**: Verify GitHub access isn't blocked by firewall/proxy
 - **Video Controls Missing**: Confirm Vimeo player is fully loaded before interaction
 
-## 🤝 Contributing & Development
+## 🤝 Contributing
 
 This project thrives on community contributions! Here's how you can help:
 
@@ -300,19 +242,6 @@ This project thrives on community contributions! Here's how you can help:
 - **Customization Options**: Themes, layouts, and personalization features
 - **Keyboard Shortcuts**: Hotkey support for power users
 - **Mobile Optimization**: Enhanced mobile browser compatibility
-- **API Integration**: Potential Radiopaedia API features (if available)
-
-### Development Setup
-
-1. Clone the repository
-2. Make changes to `userscripts.js`
-3. Update version in both `userscripts.js` and `userscripts.meta.js`
-4. Test thoroughly across multiple browsers
-5. Submit pull request with detailed description
-
-- Keyboard shortcuts
-- Export/import progress data
-- Theme customization
 
 ## 📝 License
 
