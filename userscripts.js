@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name        Radiopaedia: Course Sidebar with Video Manager
 // @namespace   https://github.com/simonrek/radiopedia-enhanced-course-experience
-// @version     3.1.3
+// @version     3.1.4
 // @updateURL   https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.meta.js
 // @downloadURL https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.user.js
 // @description Enhanced course tool with sidebar listing all videos, progress tracking, and individual video controls
@@ -72,18 +72,25 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
 
   // Enhanced function to format duration with hours for better readability
   function formatTimeWithHours(seconds) {
-    if (seconds < 3600) {
-      // Less than 60 minutes, use standard format
-      return formatDuration(seconds)
-    }
-
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
+    const remainingSeconds = Math.floor(seconds % 60)
 
-    if (minutes === 0) {
-      return `${hours} h`
+    if (hours > 0) {
+      if (minutes === 0) {
+        return `${hours} h`
+      }
+      return `${hours} h ${minutes} min`
+    } else {
+      // Always show min/sec format for consistency
+      if (minutes === 0) {
+        return `${remainingSeconds} s`
+      }
+      if (remainingSeconds === 0) {
+        return `${minutes} min`
+      }
+      return `${minutes} min ${remainingSeconds} s`
     }
-    return `${hours} h ${minutes} min`
   }
 
   // Data management functions
@@ -255,7 +262,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         const content = parts.join(" • ")
         statsElement.innerHTML = `📈 Today: ${content}${
           stats.videosWatched > 0 ? ` • ${timeText} watched` : ""
-        } <span style="cursor: pointer; color: #3498db; font-weight: bold;">📊 View Stats</span>`
+        }<br> <span style="cursor: pointer; color: #3498db; font-weight: bold;">📊 View your 7-Day Study Stats</span>`
       } else {
         // Show placeholder when no activity today
         statsElement.innerHTML = `📈 Today: No activity yet <span style="cursor: pointer; color: #3498db; font-weight: bold;">📊 View Stats</span>`
@@ -295,10 +302,26 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
   function showStatsWindow() {
     // Remove existing window if any
     const existingWindow = document.querySelector("#stats-window")
+    const existingOverlay = document.querySelector("#stats-overlay")
     if (existingWindow) {
       existingWindow.remove()
+      if (existingOverlay) existingOverlay.remove()
       return
     }
+
+    // Create dimmed overlay
+    const overlay = document.createElement("div")
+    overlay.id = "stats-overlay"
+    Object.assign(overlay.style, {
+      position: "fixed",
+      top: "0",
+      left: "0",
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0, 0, 0, 0.5)",
+      zIndex: 99998,
+      backdropFilter: "blur(2px)",
+    })
 
     const last7Days = getLast7DaysStats()
     const totalVideos = last7Days.reduce(
@@ -325,7 +348,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       width: "400px",
       background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
       borderRadius: "12px",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+      boxShadow: "0 20px 60px rgba(0,0,0,0.8)",
       zIndex: 100000,
       color: "#ecf0f1",
       fontFamily: "system-ui, -apple-system, sans-serif",
@@ -418,26 +441,27 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       </div>
     `
 
+    document.body.appendChild(overlay)
     document.body.appendChild(statsWindow)
 
     // Add close button functionality
     const closeBtn = statsWindow.querySelector("#close-stats")
-    closeBtn.addEventListener("click", () => statsWindow.remove())
+    closeBtn.addEventListener("click", () => {
+      statsWindow.remove()
+      overlay.remove()
+    })
 
-    // Close on outside click
-    setTimeout(() => {
-      document.addEventListener("click", function closeOnOutside(e) {
-        if (!statsWindow.contains(e.target)) {
-          statsWindow.remove()
-          document.removeEventListener("click", closeOnOutside)
-        }
-      })
-    }, 100)
+    // Close on outside click (overlay click)
+    overlay.addEventListener("click", () => {
+      statsWindow.remove()
+      overlay.remove()
+    })
 
     // Close on Escape key
     document.addEventListener("keydown", function closeOnEscape(e) {
       if (e.key === "Escape") {
         statsWindow.remove()
+        overlay.remove()
         document.removeEventListener("keydown", closeOnEscape)
       }
     })
@@ -783,7 +807,8 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     // Add daily stats section (above footer)
     const statsSection = document.createElement("div")
     statsSection.innerHTML = `
-      <div style="padding: 10px 15px; border-top: 1px solid #34495e; background: #2c3e50;">
+      <div style="padding: 12px 15px; border-top: 1px solid #34495e; background: #2c3e50;">
+        <h4 style="margin: 0 0 8px 0; color: #3498db; font-size: 12px; font-weight: bold; text-align: center;">📊 Your Study Stats</h4>
         <p id="daily-stats" style="margin: 0; color: #e67e22; font-size: 11px; font-weight: bold; text-align: center; display: block;"></p>
       </div>
     `
