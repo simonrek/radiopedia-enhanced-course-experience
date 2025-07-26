@@ -560,68 +560,41 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     )
   }
 
-  // Get current page title from various sources
+  // Get current page title from reliable sources only
   function getCurrentPageTitle() {
-    // Method 1: Try to find the current lesson in the course overview (marked with bold text)
-    // Look for patterns like the one the user provided
-    const currentLessonSelectors = [
+    // Method 1: Try to find the current lesson in the course overview sidebar (most reliable)
+    // Look for the highlighted/current lesson in the sidebar
+    const sidebarSelectors = [
       'li span[style*="color:#000000"] b',
       'li span[style*="color: #000000"] b',
-      '.course-overview li span[style*="color:#000000"] b',
-      '.course-overview li span[style*="color: #000000"] b',
       '.sidebar li span[style*="color:#000000"] b',
       '.sidebar li span[style*="color: #000000"] b',
+      '.course-overview li span[style*="color:#000000"] b',
+      '.course-overview li span[style*="color: #000000"] b',
+      // Also try looking for active/current lesson indicators
+      ".sidebar .active b",
+      ".sidebar .current b",
+      ".course-overview .active b",
+      ".course-overview .current b",
     ]
 
-    for (const selector of currentLessonSelectors) {
+    for (const selector of sidebarSelectors) {
       const element = document.querySelector(selector)
       if (element && element.textContent.trim()) {
-        return element.textContent.trim()
+        const text = element.textContent.trim()
+        // Filter out obviously wrong content (user names, etc.)
+        if (
+          text.length > 3 &&
+          text.length < 100 &&
+          !text.includes("@") &&
+          !text.toLowerCase().includes("user")
+        ) {
+          return text
+        }
       }
     }
 
-    // Method 2: Try to find the page title in the main content area
-    const mainTitleSelectors = [
-      "h1",
-      ".page-title",
-      ".lesson-title",
-      ".main-content h1",
-      ".content h1",
-      ".course-content h1",
-    ]
-
-    for (const selector of mainTitleSelectors) {
-      const element = document.querySelector(selector)
-      if (element && element.textContent.trim()) {
-        return element.textContent.trim()
-      }
-    }
-
-    // Method 3: Try to extract from page URL or breadcrumbs
-    const breadcrumbSelectors = [
-      ".breadcrumb li:last-child",
-      ".breadcrumb a:last-child",
-      ".breadcrumbs li:last-child",
-      ".breadcrumbs a:last-child",
-    ]
-
-    for (const selector of breadcrumbSelectors) {
-      const element = document.querySelector(selector)
-      if (element && element.textContent.trim()) {
-        return element.textContent.trim()
-      }
-    }
-
-    // Method 4: Extract from page title tag as fallback
-    const pageTitle = document.title
-    if (pageTitle && pageTitle.includes(" - ")) {
-      const titlePart = pageTitle.split(" - ")[0]
-      if (titlePart && titlePart.trim()) {
-        return titlePart.trim()
-      }
-    }
-
-    // Method 5: Try to extract from URL path
+    // Method 2: Extract from URL path (reliable fallback)
     const path = window.location.pathname
     if (path.includes("/pages/")) {
       const pathParts = path.split("/")
@@ -632,6 +605,15 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         return courseName
           .replace(/-/g, " ")
           .replace(/\b\w/g, l => l.toUpperCase())
+      }
+    }
+
+    // Method 3: Extract from page title tag as last resort
+    const pageTitle = document.title
+    if (pageTitle && pageTitle.includes(" - ")) {
+      const titlePart = pageTitle.split(" - ")[0]
+      if (titlePart && titlePart.trim() && titlePart.length < 100) {
+        return titlePart.trim()
       }
     }
 
