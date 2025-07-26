@@ -1,13 +1,14 @@
 <!-- @format -->
 
-# 📚 Radiopaedia Course Sidebar with Video Manager
+# 📚 Radiopaedia Enhanced Course Experience
 
-An enhanced userscript that transforms the Radiopaedia course experience by adding a powerful video management sidebar with comprehensive controls, progress tracking, and seamless navigation.
+An advanced userscript that revolutionizes the Radiopaedia learning experience with a comprehensive sidebar featuring video management, case study tracking, intelligent statistics, and seamless navigation - all designed to enhance your medical education journey.
 
-![Version](https://img.shields.io/badge/version-3.0-blue.svg)
+![Version](https://img.shields.io/badge/version-3.1.4-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Safari](https://img.shields.io/badge/Safari-Userscripts-orange.svg)
 ![Chrome](https://img.shields.io/badge/Chrome-Tampermonkey-red.svg)
+![Auto-Update](https://img.shields.io/badge/Auto--Update-Enabled-green.svg)
 
 ## 📸 Preview
 
@@ -16,72 +17,54 @@ An enhanced userscript that transforms the Radiopaedia course experience by addi
   <p><em>The enhanced video management sidebar in action on a Radiopaedia course page</em></p>
 </div>
 
-## ✨ Features
+## ✨ Enhanced Features
 
-### 🎥 **Video Management**
+### 🧭 **Smart Course Navigation**
 
-- **Smart Video Detection**: Automatically finds all Vimeo videos on the course page
-- **Individual Controls**: Each video has its own set of controls
-- **Progress Tracking**: Videos are automatically marked as watched (✅) when 80% completed
-- **Persistent Storage**: Remembers watched videos across browser sessions
+- **Dynamic Page Titles**: Automatically detects and displays the current course section title in real-time
+- **Tabbed Interface**: Switch seamlessly between Videos and Cases with intuitive tab navigation
+- **Enhanced Video Player**: Full integration with Radiopaedia's Vimeo player for advanced control
 
-### 🎮 **Video Controls**
+### 📊 **Intelligent Statistics Dashboard**
 
-- **▶️ Play/Pause**: Toggle video playback with visual feedback
-- **🔇 Mute/Unmute**: Audio control with state indication
-- **⚡ Speed Control**: Cycle through playback speeds (1x → 1.25x → 1.5x → 2x)
-- **📺 Picture-in-Picture**: Enhanced PiP with auto-play/pause functionality
-- **⛶ Fullscreen**: One-click fullscreen mode
+- **Real-Time Progress Tracking**: Comprehensive statistics that update instantly as you learn
+- **Daily Learning Metrics**: Track today's video watch time and cases reviewed with precise timing
+- **Persistent Data Storage**: All your progress is automatically saved and preserved across sessions
+- **Prominent Stats Display**: Eye-catching statistics section that's always visible at the bottom of the page
+- **Overlay Stats Modal**: Click stats for an immersive full-screen overlay with detailed breakdown
 
-### 🚀 **Navigation & Overview**
+### 🎥 **Advanced Video Management**
 
-- **Next Lesson**: Automatically navigate to the next course page
-- **Course Overview**: Jump to the course content sidebar instantly
-- **Smart Scrolling**: Click any video to smoothly scroll to it on the page
-- **Active Video Highlighting**: Current video is highlighted with a blue border
+- **Smart Playback Controls**: Enhanced video controls with progress synchronization
+- **Automatic Progress Detection**: Intelligently tracks which videos you've completed
+- **Case Study Integration**: Seamlessly track both video content and case studies in one unified interface
+- **Watch Time Analytics**: Precise tracking of time spent on educational content
 
-### 📊 **Study Analytics & Progress**
+### 🔄 **Auto-Update System**
 
-- **Daily Study Counter**: Tracks videos watched and time spent each day
-- **7-Day Statistics Window**: Click the 🤓 emoji to view detailed progress analytics
-- **Visual Progress Charts**: Interactive charts showing your learning patterns
-- **Motivational Metrics**: Total videos, study time, and daily averages
-- **Video Duration Display**: Shows individual video lengths for better planning
-- **Robust Stats**: If you skip a day, your analytics will show zero for that day and never break or show errors. Progress tracking and statistics are always accurate, regardless of your study schedule.
+- **Seamless Updates**: Automatically checks for and installs new versions
+- **GitHub Integration**: Updates delivered directly from the official repository
+- **Version Synchronization**: Always stay current with the latest features and improvements
+- **Zero Maintenance**: Set it once and enjoy continuous improvements
 
-### 🎨 **User Interface**
+## 🚀 Quick Start
 
-- **Collapsible Sidebar**: Sleek, modern sidebar that slides in/out
-- **Professional Design**: Beautiful gradient themes and smooth animations
-- **Responsive Layout**: Adapts to different screen sizes
-- **Visual Feedback**: Clear indicators for all interactions
+Ready to enhance your Radiopaedia learning experience?
 
-## 🛠️ Installation
+👉 **[Complete Installation Guide](INSTALL.md)** - Step-by-step instructions for all browsers
 
-### Safari (Recommended)
+### What You'll Get
 
-1. Install the **Userscripts** extension from the App Store
-2. Enable the extension in Safari preferences
-3. Click the Userscripts icon in Safari's toolbar
-4. Select "Create New Userscript"
-5. Copy and paste the content from `userscripts.js`
-6. Save and enable the script
+1. **Enhanced sidebar** with video and case management
+2. **Real-time statistics** tracking your daily progress
+3. **Auto-update system** for seamless improvements
+4. **Professional video controls** with PiP and speed control
 
-### Chrome/Edge/Firefox
+> **💡 Pro Tip**: The auto-update system ensures you always have the latest features!
 
-1. Install **Tampermonkey** or **Greasemonkey** extension
-2. Click the extension icon
-3. Select "Create a new script"
-4. Copy and paste the content from `userscripts.js`
-5. Save the script (Ctrl+S)
+## ⚙️ Advanced Configuration
 
-### Installation Video
-
-🎥 _Coming soon: Step-by-step installation video guide_
-
-## ⚙️ Customization
-
-The script includes easy-to-modify settings at the top of the file:
+The script includes easy-to-modify settings for personalized experience:
 
 ```javascript
 // ========================================
@@ -92,6 +75,22 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 // ========================================
 ```
 
+### Available Settings
+
+- **AUTOPLAY_FIRST_VIDEO**: Controls automatic video playback when entering a course
+- **SIDEBAR_OPEN_BY_DEFAULT**: Determines initial sidebar visibility state
+
+### Auto-Update Configuration
+
+The script automatically updates itself using the metadata file (`userscripts.meta.js`). This ensures:
+
+- ✅ Latest features and bug fixes
+- ✅ Compatibility with Radiopaedia changes
+- ✅ Enhanced security and performance
+- ✅ New functionality delivered seamlessly
+
+> **Note**: Auto-updates respect your custom settings and preserve all stored data.
+
 ### Customization Options:
 
 | Setting                   | Default | Description                                                         |
@@ -101,60 +100,101 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Set to true to have sidebar open when p
 
 ## 🎯 How to Use
 
-### Basic Usage
+### Getting Started
 
 1. **Navigate** to any Radiopaedia course page
-2. **Look** for the blue toggle button (◀) on the right edge of your screen
-3. **Click** the toggle to open the video sidebar
-4. **Enjoy** enhanced video controls and progress tracking!
+2. **Look** for the enhanced sidebar that automatically appears on the right
+3. **Explore** the tabbed interface with Videos and Cases sections
+4. **Watch** your progress update in real-time at the bottom of the page!
 
-### Video Controls
+### Enhanced Interface
 
-- **Click video title**: Scroll to that video on the page
-- **Play/Pause**: Control video playback with auto-unmute feature
-- **Mute/Unmute**: Toggle audio (essential for PiP mode)
-- **Speed**: Cycle through different playback speeds
-- **PiP**: Enter Picture-in-Picture mode with auto-unmute
-- **Fullscreen**: Expand video to fullscreen
+#### Tabbed Navigation
 
-### Progress & Analytics
+- **Videos Tab**: Complete video management with enhanced controls
+- **Cases Tab**: Comprehensive case study tracking and navigation
+- **Auto-Detection**: Intelligently shows relevant content based on current page
 
+#### Video Controls & Management
+
+- **Click video title**: Instantly scroll to that video on the page
+- **Play/Pause**: Advanced video controls with auto-unmute feature
+- **Speed Control**: Cycle through playback speeds (0.5x to 2x)
+- **PiP Mode**: Picture-in-Picture with automatic audio management
+- **Fullscreen**: Seamless fullscreen experience
+- **Progress Sync**: Visual indicators show completion status
+
+#### Case Study Integration
+
+- **Smart Tracking**: Automatically detects when cases are reviewed
+- **Progress Indicators**: Clear visual feedback for completed cases
+- **Quick Navigation**: Jump between cases effortlessly
+- **Unified Analytics**: Cases and videos tracked in one comprehensive system
+
+### Advanced Analytics & Statistics
+
+#### Real-Time Progress Dashboard
+
+- **Daily Metrics**: Live counter showing today's learning activity
+- **Comprehensive Stats**: Track both video watch time and cases reviewed
+- **Persistent Storage**: All data automatically saved across sessions
+- **Time Formatting**: Clean, readable time displays (hours:minutes or minutes:seconds)
+
+#### Enhanced Statistics Display
+
+- **Prominent Bottom Section**: Always-visible stats at the page bottom
+- **Overlay Modal**: Click stats for immersive full-screen analytics view
+- **Dynamic Updates**: Statistics refresh instantly as you learn
+- **Visual Enhancement**: Gradient backgrounds and modern UI design
+
+#### Smart Page Detection
+
+- **Dynamic Titles**: Automatically detects and displays current course section
+- **Reliable Sources**: Filters out user names and irrelevant content
+- **Real-Time Updates**: Page title updates as you navigate through content
+
+### Navigation & Workflow
+
+- **🚀 Next Lesson**: Seamlessly move to the next course section
+- **📋 Course Overview**: Quick access to complete course content
+- **Auto-Save**: All progress automatically preserved without user intervention
 - **✅ Progress**: Green checkmarks show completed videos
-- **📈 Daily Stats**: Real-time counter showing today's study progress
-- **🤓 Geek Stats**: Click the nerd emoji for detailed 7-day analytics
-- **📊 Visual Charts**: Progress bars and metrics for motivation
-- **⏱️ Time Tracking**: Automatic duration tracking for each video
 
-### Navigation
+## 🔧 Technical Details & Architecture
 
-- **🚀 Next Lesson**: Automatically go to the next course page
-- **📋 Overview**: Jump to the course content list
-- **✅ Progress**: Green checkmarks show completed videos
-
-## 🔧 Technical Details
-
-### Compatibility
+### Platform Compatibility
 
 - **Radiopaedia**: Works on all `radiopaedia.org/courses*` pages
-- **Vimeo**: Integrates with Vimeo Player API for reliable video control
-- **Storage**: Uses localStorage for persistent progress tracking
-- **Browsers**: Safari (Userscripts), Chrome/Edge/Firefox (Tampermonkey)
+- **Vimeo Integration**: Deep integration with Vimeo Player API for reliable video control
+- **Data Persistence**: Advanced localStorage implementation for robust progress tracking
+- **Browser Support**:
+  - Safari with Userscripts extension
+  - Chrome/Edge/Firefox with Tampermonkey/Greasemonkey
+  - All modern browsers with userscript manager support
 
-### Key Technologies
+### Core Technologies
 
-- **Vimeo Player API**: For robust video control
-- **localStorage**: For progress persistence
-- **Modern JavaScript**: ES6+ with async/await patterns
-- **CSS3**: For smooth animations and modern styling
+- **Vimeo Player API**: Professional-grade video control and event handling
+- **Modern JavaScript**: ES6+ with async/await patterns and event-driven architecture
+- **Advanced CSS3**: Gradient backgrounds, overlay effects, blur filters, and responsive design
+- **localStorage API**: Sophisticated data persistence with automatic backup and recovery
+- **GitHub Integration**: Auto-update system with metadata synchronization
 
-### Development Dependencies
+### Development & Deployment
 
-- **VS Code**: Primary development environment
-- **Prettier**: Code formatting (system-wide configuration)
-- **ESLint**: Code linting and quality assurance (system-wide configuration)
-- **Git**: Version control
+- **Version Control**: Git-based development with semantic versioning
+- **Auto-Update System**: GitHub-powered delivery with metadata validation
+- **Code Quality**: ESLint and Prettier integration for professional standards
+- **Testing**: Cross-browser compatibility testing on multiple platforms
 
-## 🚀 Features in Detail
+### Performance Optimizations
+
+- **Efficient DOM Manipulation**: Minimal reflows and optimized rendering
+- **Event Delegation**: Smart event handling for improved performance
+- **Memory Management**: Proper cleanup and resource management
+- **Async Operations**: Non-blocking operations for smooth user experience
+
+## 🚀 Version History & Evolution
 
 ### Smart Video Detection
 
@@ -168,53 +208,108 @@ The script automatically scans the page for Vimeo iframes and creates a comprehe
 - Daily study statistics track videos watched and time spent
 - 7-day analytics window provides detailed learning insights
 
-### Study Analytics Dashboard
+### Current Version: 3.1.4 - Major Feature Release
 
-- **Daily Counter**: Shows today's videos watched and total study time
-- **Geek Stats Window**: Comprehensive 7-day progress analysis
-- **Visual Progress Bars**: Chart your daily learning activity
-- **Motivational Metrics**: Track consistency and improvement over time
-- **Video Duration Info**: Plan your study sessions with accurate time estimates
+#### ✨ Latest Enhancements (v3.1.4)
 
-### Enhanced PiP Mode
+- **Enhanced Statistics System**: Completely rebuilt tracking with real-time case and video monitoring
+- **Prominent Stats Display**: Always-visible statistics section at bottom of page with overlay modal
+- **Dynamic Page Titles**: Intelligent title detection from reliable sources (no more user names!)
+- **Improved Time Formatting**: Consistent hours:minutes and minutes:seconds display
+- **Advanced UI Design**: Gradient backgrounds, overlay effects, and modern visual aesthetics
+- **Auto-Update Integration**: Seamless GitHub-powered update system
 
-- Automatically unmutes video when entering PiP
-- Ensures video plays in PiP mode
-- Pauses video when exiting PiP
+#### Previous Major Features
 
-### Intelligent Navigation
+- **Tabbed Interface**: Videos and Cases organized in intuitive tabs
+- **Comprehensive Case Tracking**: Full integration with Radiopaedia case studies
+- **Enhanced Video Controls**: Professional-grade video management system
+- **Persistent Data Storage**: Robust localStorage implementation with backup/recovery
 
-- Next lesson button increments page numbers automatically
-- Course overview jumps to the existing sidebar content
-- Smooth scrolling for better user experience
+### Feature Deep Dive
 
-## 🔒 Privacy & Data
+#### Advanced Analytics Dashboard
 
-- All progress tracking and analytics are stored locally in your browser using localStorage.
-- No data is ever sent, transmitted, or shared outside your browser.
-- The userscript does not collect, transmit, or access any personal data from Radiopaedia or any other website.
-- Your study history and statistics remain private and are never uploaded or shared.
+- **Real-Time Updates**: Statistics refresh instantly as you interact with content
+- **Dual Content Tracking**: Unified system for both videos and case studies
+- **Intelligent Time Calculation**: Precise tracking with smart formatting algorithms
+- **Visual Enhancement**: Eye-catching design with gradient overlays and blur effects
+- **Persistent Storage**: All data automatically saved and restored across browser sessions
 
-## 🐛 Known Issues & Limitations
+#### Smart Content Detection
 
-- **Work in Progress**: This is an active development project
-- **Vimeo Dependency**: Only works with Vimeo-embedded videos
-- **Page Structure**: Relies on current Radiopaedia page structure
-- **Browser Permissions**: May require enabling userscript permissions
+- **Dynamic Page Recognition**: Automatically adapts to current course section
+- **Reliable Title Extraction**: Filters content to avoid user names and irrelevant data
+- **Real-Time Synchronization**: Updates instantly as you navigate through course content
+- **Fallback Systems**: Multiple detection methods ensure consistent functionality
 
-## 🤝 Contributing
+#### Enhanced Video Experience
 
-This project is open source! Contributions are welcome:
+- **Professional Controls**: Full Vimeo Player API integration for reliable operation
+- **PiP Enhancement**: Automatic unmuting and play state management for Picture-in-Picture
+- **Speed Control**: Smooth playback speed cycling from 0.5x to 2x
+- **Progress Synchronization**: Visual completion indicators with real-time updates
+- **Seamless Navigation**: Click-to-scroll functionality for instant video access
 
-1. **Fork** the repository
-2. **Create** a feature branch
-3. **Make** your improvements
-4. **Submit** a pull request
+#### Case Study Integration
 
-### Ideas for Contributions
+- **Unified Tracking**: Cases and videos managed in one comprehensive system
+- **Progress Indicators**: Clear visual feedback for completed case reviews
+- **Smart Detection**: Automatic recognition when cases are accessed and reviewed
+- **Analytics Integration**: Case study time included in daily statistics
 
-- Support for other video platforms
-- Additional customization options
+## 🔒 Privacy & Data Security
+
+- **Local Storage Only**: All progress tracking and analytics stored locally in your browser using localStorage
+- **Zero Data Transmission**: No data ever sent, transmitted, or shared outside your browser
+- **Privacy Focused**: Does not collect, access, or transmit personal data from Radiopaedia or any website
+- **Complete Control**: Your study history and statistics remain private and under your control
+- **Auto-Update Safety**: Update system only retrieves code updates, never accesses your data
+
+## 🐛 Known Issues & Troubleshooting
+
+### Current Limitations
+
+- **Vimeo Dependency**: Optimized for Vimeo-embedded videos (standard on Radiopaedia)
+- **Course Pages Only**: Designed specifically for `radiopaedia.org/courses*` pages
+- **Modern Browser Requirement**: Requires ES6+ support for full functionality
+
+### Troubleshooting
+
+- **Script Not Loading**: Ensure userscript manager is enabled and script is active
+- **Statistics Not Updating**: Check browser console for any localStorage errors
+- **Auto-Update Issues**: Verify GitHub access isn't blocked by firewall/proxy
+- **Video Controls Missing**: Confirm Vimeo player is fully loaded before interaction
+
+## 🤝 Contributing & Development
+
+This project thrives on community contributions! Here's how you can help:
+
+### How to Contribute
+
+1. **Fork** the repository on GitHub
+2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
+3. **Commit** your changes (`git commit -m 'Add AmazingFeature'`)
+4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+5. **Open** a Pull Request
+
+### Development Ideas
+
+- **Multi-Platform Support**: Extend to other educational video platforms
+- **Advanced Analytics**: Export/import functionality for progress data
+- **Customization Options**: Themes, layouts, and personalization features
+- **Keyboard Shortcuts**: Hotkey support for power users
+- **Mobile Optimization**: Enhanced mobile browser compatibility
+- **API Integration**: Potential Radiopaedia API features (if available)
+
+### Development Setup
+
+1. Clone the repository
+2. Make changes to `userscripts.js`
+3. Update version in both `userscripts.js` and `userscripts.meta.js`
+4. Test thoroughly across multiple browsers
+5. Submit pull request with detailed description
+
 - Keyboard shortcuts
 - Export/import progress data
 - Theme customization
