@@ -2,14 +2,17 @@
 
 // ==UserScript==
 // @name        Radiopaedia: Course Sidebar with Video Manager
-// @namespace   com.yourns.radiopaedia-course-tool
-// @version     3.0
+// @namespace   https://github.com/simonrek/radiopedia-enhanced-course-experience
+// @version     3.1.4
+// @updateURL   https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.meta.js
+// @downloadURL https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.js
 // @description Enhanced course tool with sidebar listing all videos, progress tracking, and individual video controls
 // @match       https://radiopaedia.org/courses*
 // @match       https://radiopaedia.org/courses/*
 // @grant       none
 // Built by Simon Rekanovic for Radiopaedia users as a form of appreciation for Radiopaedia's work, mission and vision. See GitHub repository for more details.
 // @author      Simon Rekanovic
+// @date        2024-07-25
 // ==/UserScript==
 
 // ========================================
@@ -24,9 +27,14 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
 
   // Global state
   let videos = []
+  let cases = []
   let currentActiveVideo = null
+  let currentActiveCase = null
   let watchedVideos = new Set(
     JSON.parse(localStorage.getItem("radiopaedia-watched-videos") || "[]")
+  )
+  let viewedCases = new Set(
+    JSON.parse(localStorage.getItem("radiopaedia-viewed-cases") || "[]")
   )
 
   // Enhanced tracking for detailed statistics
@@ -49,11 +57,40 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     return currentPageVideos.filter(id => watchedVideos.has(id)).length
   }
 
+  // Helper function to count current page viewed cases
+  function getCurrentPageViewedCount() {
+    const currentPageCases = cases.map(c => c.id)
+    return currentPageCases.filter(id => viewedCases.has(id)).length
+  }
+
   // Helper function to format duration
   function formatDuration(seconds) {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = Math.floor(seconds % 60)
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
+  }
+
+  // Enhanced function to format duration with hours for better readability
+  function formatTimeWithHours(seconds) {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const remainingSeconds = Math.floor(seconds % 60)
+
+    if (hours > 0) {
+      if (minutes === 0) {
+        return `${hours} h`
+      }
+      return `${hours} h ${minutes} min`
+    } else {
+      // Always show min/sec format for consistency
+      if (minutes === 0) {
+        return `${remainingSeconds} s`
+      }
+      if (remainingSeconds === 0) {
+        return `${minutes} min`
+      }
+      return `${minutes} min ${remainingSeconds} s`
+    }
   }
 
   // Data management functions
@@ -82,6 +119,10 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     localStorage.setItem(
       "radiopaedia-watched-videos",
       JSON.stringify([...watchedVideos])
+    )
+    localStorage.setItem(
+      "radiopaedia-viewed-cases",
+      JSON.stringify([...viewedCases])
     )
     localStorage.setItem(
       "radiopaedia-video-progress",
@@ -128,6 +169,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         videosWatched: 0,
         totalTimeWatched: 0,
         uniqueVideosWatched: 0,
+        casesViewed: 0,
       }
     )
   }
@@ -143,6 +185,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         videosWatched: 0,
         totalTimeWatched: 0,
         uniqueVideosWatched: 0,
+        casesViewed: 0,
       }
     }
 
@@ -169,6 +212,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         videosWatched: 0,
         totalTimeWatched: 0,
         uniqueVideosWatched: 0,
+        casesViewed: 0,
       }
     }
 
@@ -177,12 +221,53 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     localStorage.setItem("radiopaedia-daily-stats", JSON.stringify(allStats))
   }
 
+  // Case study tracking function - only called when case is marked as viewed
+  function updateTodayCaseStats() {
+    const todayKey = getTodayKey()
+    const allStats = JSON.parse(
+      localStorage.getItem("radiopaedia-daily-stats") || "{}"
+    )
+
+    if (!allStats[todayKey]) {
+      allStats[todayKey] = {
+        videosWatched: 0,
+        totalTimeWatched: 0,
+        uniqueVideosWatched: 0,
+        casesViewed: 0,
+      }
+    }
+
+    allStats[todayKey].casesViewed += 1
+
+    localStorage.setItem("radiopaedia-daily-stats", JSON.stringify(allStats))
+  }
+
   function updateDailyStatsDisplay() {
     const stats = getTodayStats()
     const statsElement = document.querySelector("#daily-stats")
-    if (statsElement && stats.videosWatched > 0) {
-      const timeText = formatDuration(stats.totalTimeWatched)
-      statsElement.innerHTML = `📈 Today: ${stats.videosWatched} videos • ${timeText} watched <span style="cursor: pointer; color: #3498db; font-weight: bold;">🤓 stats</span>`
+
+    if (statsElement) {
+      // Always show the stats section, even if no activity today
+      if (stats.videosWatched > 0 || stats.casesViewed > 0) {
+        const timeText = formatTimeWithHours(stats.totalTimeWatched)
+        const parts = []
+
+        if (stats.videosWatched > 0) {
+          parts.push(`${stats.videosWatched} videos`)
+        }
+        if (stats.casesViewed > 0) {
+          parts.push(`${stats.casesViewed} cases`)
+        }
+
+        const content = parts.join(" • ")
+        statsElement.innerHTML = `📈 Today: ${content}${
+          stats.videosWatched > 0 ? ` • ${timeText} watched` : ""
+        }<br> <span style="cursor: pointer; color: #3498db; font-weight: bold;">📊 View your 7-Day Study Stats</span>`
+      } else {
+        // Show placeholder when no activity today
+        statsElement.innerHTML = `📈 Today: No activity yet <span style="cursor: pointer; color: #3498db; font-weight: bold;">📊 View Stats</span>`
+      }
+
       statsElement.style.display = "block"
 
       // Add click listener to the stats element
@@ -207,6 +292,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         videosWatched: rawStats.videosWatched || 0,
         totalTimeWatched: rawStats.totalTimeWatched || 0,
         uniqueVideosWatched: rawStats.uniqueVideosWatched || 0,
+        casesViewed: rawStats.casesViewed || 0,
       })
     }
 
@@ -216,10 +302,26 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
   function showStatsWindow() {
     // Remove existing window if any
     const existingWindow = document.querySelector("#stats-window")
+    const existingOverlay = document.querySelector("#stats-overlay")
     if (existingWindow) {
       existingWindow.remove()
+      if (existingOverlay) existingOverlay.remove()
       return
     }
+
+    // Create dimmed overlay
+    const overlay = document.createElement("div")
+    overlay.id = "stats-overlay"
+    Object.assign(overlay.style, {
+      position: "fixed",
+      top: "0",
+      left: "0",
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0, 0, 0, 0.5)",
+      zIndex: 99998,
+      backdropFilter: "blur(2px)",
+    })
 
     const last7Days = getLast7DaysStats()
     const totalVideos = last7Days.reduce(
@@ -234,6 +336,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       (sum, day) => sum + day.totalTimeWatched,
       0
     )
+    const totalCases = last7Days.reduce((sum, day) => sum + day.casesViewed, 0)
 
     const statsWindow = document.createElement("div")
     statsWindow.id = "stats-window"
@@ -245,13 +348,14 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       width: "400px",
       background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
       borderRadius: "12px",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+      boxShadow: "0 20px 60px rgba(0,0,0,0.8)",
       zIndex: 100000,
       color: "#ecf0f1",
       fontFamily: "system-ui, -apple-system, sans-serif",
     })
 
     const maxVideos = Math.max(...last7Days.map(day => day.videosWatched), 1)
+    const maxCases = Math.max(...last7Days.map(day => day.casesViewed), 1)
 
     statsWindow.innerHTML = `
       <div style="padding: 20px;">
@@ -261,22 +365,25 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         </div>
         
         <div style="margin-bottom: 20px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
             <div style="background: #27ae60; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 20px; font-weight: bold;">${totalVideos}</div>
-              <div style="font-size: 10px; opacity: 0.8;">Total Views</div>
+              <div style="font-size: 18px; font-weight: bold;">${totalVideos}</div>
+              <div style="font-size: 9px; opacity: 0.8;">Video Views</div>
             </div>
             <div style="background: #3498db; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 20px; font-weight: bold;">${totalUniqueVideos}</div>
-              <div style="font-size: 10px; opacity: 0.8;">Unique Videos</div>
+              <div style="font-size: 18px; font-weight: bold;">${totalUniqueVideos}</div>
+              <div style="font-size: 9px; opacity: 0.8;">Unique Videos</div>
             </div>
             <div style="background: #e67e22; padding: 10px; border-radius: 8px;">
-              <div style="font-size: 20px; font-weight: bold;">${formatDuration(
+              <div style="font-size: 18px; font-weight: bold;">${formatTimeWithHours(
                 totalTime
               )}</div>
-              <div style="font-size: 10px; opacity: 0.8;">Total Time</div>
+              <div style="font-size: 9px; opacity: 0.8;">Watch Time</div>
             </div>
-         
+            <div style="background: #9b59b6; padding: 10px; border-radius: 8px;">
+              <div style="font-size: 18px; font-weight: bold;">${totalCases}</div>
+              <div style="font-size: 9px; opacity: 0.8;">Cases Viewed</div>
+            </div>
           </div>
         </div>
 
@@ -286,33 +393,41 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
             .map(
               day => `
             <div style="display: flex; align-items: center; margin-bottom: 8px; padding: 8px; background: #34495e; border-radius: 6px;">
-              <div style="width: 40px; font-size: 12px; color: #95a5a6;">${
+              <div style="width: 35px; font-size: 11px; color: #95a5a6;">${
                 day.dayName
               }</div>
-              <div style="flex: 1; margin: 0 10px;">
-                <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden; margin-bottom: 2px;">
+              <div style="flex: 1; margin: 0 8px;">
+                <div style="background: #2c3e50; height: 16px; border-radius: 8px; overflow: hidden; margin-bottom: 2px;">
                   <div style="height: 100%; background: linear-gradient(90deg, #3498db, #2980b9); width: ${
                     (day.videosWatched / maxVideos) * 100
                   }%; transition: width 0.3s ease;"></div>
                 </div>
-                <div style="background: #2c3e50; height: 20px; border-radius: 10px; overflow: hidden;">
+                <div style="background: #2c3e50; height: 16px; border-radius: 8px; overflow: hidden; margin-bottom: 2px;">
                   <div style="height: 100%; background: linear-gradient(90deg, #e67e22, #d35400); width: ${
                     (day.totalTimeWatched /
                       Math.max(...last7Days.map(d => d.totalTimeWatched), 1)) *
                     100
                   }%; transition: width 0.3s ease;"></div>
                 </div>
+                <div style="background: #2c3e50; height: 16px; border-radius: 8px; overflow: hidden;">
+                  <div style="height: 100%; background: linear-gradient(90deg, #9b59b6, #8e44ad); width: ${
+                    (day.casesViewed / maxCases) * 100
+                  }%; transition: width 0.3s ease;"></div>
+                </div>
               </div>
-              <div style="width: 80px; text-align: right; font-size: 12px;">
+              <div style="width: 80px; text-align: right; font-size: 10px;">
                 <div style="color: #3498db; font-weight: bold;">${
                   day.videosWatched
-                } views</div>
-                <div style="color: #27ae60; font-size: 10px;">${
+                } videos</div>
+                <div style="color: #27ae60; font-size: 9px;">${
                   day.uniqueVideosWatched
                 } unique</div>
-                <div style="color: #e67e22;">${formatDuration(
+                <div style="color: #e67e22;">${formatTimeWithHours(
                   day.totalTimeWatched
                 )}</div>
+                <div style="color: #9b59b6; font-weight: bold;">${
+                  day.casesViewed
+                } cases</div>
               </div>
             </div>
           `
@@ -326,26 +441,27 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       </div>
     `
 
+    document.body.appendChild(overlay)
     document.body.appendChild(statsWindow)
 
     // Add close button functionality
     const closeBtn = statsWindow.querySelector("#close-stats")
-    closeBtn.addEventListener("click", () => statsWindow.remove())
+    closeBtn.addEventListener("click", () => {
+      statsWindow.remove()
+      overlay.remove()
+    })
 
-    // Close on outside click
-    setTimeout(() => {
-      document.addEventListener("click", function closeOnOutside(e) {
-        if (!statsWindow.contains(e.target)) {
-          statsWindow.remove()
-          document.removeEventListener("click", closeOnOutside)
-        }
-      })
-    }, 100)
+    // Close on outside click (overlay click)
+    overlay.addEventListener("click", () => {
+      statsWindow.remove()
+      overlay.remove()
+    })
 
     // Close on Escape key
     document.addEventListener("keydown", function closeOnEscape(e) {
       if (e.key === "Escape") {
         statsWindow.remove()
+        overlay.remove()
         document.removeEventListener("keydown", closeOnEscape)
       }
     })
@@ -358,6 +474,38 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     s.src = "https://player.vimeo.com/api/player.js"
     s.onload = cb
     document.head.appendChild(s)
+  }
+
+  // Get case ID from case section
+  function getCaseId(caseSection) {
+    const studyDesc = caseSection.querySelector(".main-study-desc")
+    if (studyDesc && studyDesc.id) {
+      return studyDesc.id
+    }
+    // Fallback: generate ID based on heading
+    const heading = caseSection.querySelector("h2")
+    if (heading) {
+      return `case-${heading.textContent.replace(/\s+/g, "-").toLowerCase()}`
+    }
+    return null
+  }
+
+  // Get case title from case section
+  function getCaseTitle(caseSection, index) {
+    const heading = caseSection.querySelector("h2")
+    if (heading && heading.textContent.trim()) {
+      return heading.textContent.trim()
+    }
+    return `Case Study ${index + 1}`
+  }
+
+  // Get case modality from case section
+  function getCaseModality(caseSection) {
+    const modalityElement = caseSection.querySelector(".study-modality .label")
+    if (modalityElement && modalityElement.textContent.trim()) {
+      return modalityElement.textContent.trim().toUpperCase()
+    }
+    return "Unknown"
   }
 
   // Get video ID from iframe src
@@ -412,6 +560,77 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     )
   }
 
+  // Get current page title from reliable sources only
+  function getCurrentPageTitle() {
+    // Method 1: Try to find the current lesson in the course overview sidebar (most reliable)
+    // Look for the highlighted/current lesson in the sidebar
+    const sidebarSelectors = [
+      'li span[style*="color:#000000"] b',
+      'li span[style*="color: #000000"] b',
+      '.sidebar li span[style*="color:#000000"] b',
+      '.sidebar li span[style*="color: #000000"] b',
+      '.course-overview li span[style*="color:#000000"] b',
+      '.course-overview li span[style*="color: #000000"] b',
+      // Also try looking for active/current lesson indicators
+      ".sidebar .active b",
+      ".sidebar .current b",
+      ".course-overview .active b",
+      ".course-overview .current b",
+    ]
+
+    for (const selector of sidebarSelectors) {
+      const element = document.querySelector(selector)
+      if (element && element.textContent.trim()) {
+        const text = element.textContent.trim()
+        // Filter out obviously wrong content (user names, etc.)
+        if (
+          text.length > 3 &&
+          text.length < 100 &&
+          !text.includes("@") &&
+          !text.toLowerCase().includes("user")
+        ) {
+          return text
+        }
+      }
+    }
+
+    // Method 2: Extract from URL path (reliable fallback)
+    const path = window.location.pathname
+    if (path.includes("/pages/")) {
+      const pathParts = path.split("/")
+      const courseName = pathParts.find(
+        part => part && !part.includes("pages") && !part.includes("courses")
+      )
+      if (courseName) {
+        return courseName
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, l => l.toUpperCase())
+      }
+    }
+
+    // Method 3: Extract from page title tag as last resort
+    const pageTitle = document.title
+    if (pageTitle && pageTitle.includes(" - ")) {
+      const titlePart = pageTitle.split(" - ")[0]
+      if (titlePart && titlePart.trim() && titlePart.length < 100) {
+        return titlePart.trim()
+      }
+    }
+
+    // Fallback: Generic title
+    return "Course Content"
+  }
+
+  // Update content summary in header
+  function updateContentSummary() {
+    const summaryElement = document.querySelector("#content-summary")
+    if (summaryElement) {
+      const watchedCount = getCurrentPageWatchedCount()
+      const viewedCount = getCurrentPageViewedCount()
+      summaryElement.innerHTML = `${videos.length} videos • ${cases.length} cases<br>${watchedCount}/${videos.length} videos watched • ${viewedCount}/${cases.length} cases viewed`
+    }
+  }
+
   // Create sidebar
   function createSidebar() {
     const sidebar = document.createElement("div")
@@ -432,12 +651,12 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     })
 
     // Header
+    const currentPageTitle = getCurrentPageTitle()
     const header = document.createElement("div")
     header.innerHTML = `
       <div style="padding: 20px; border-bottom: 2px solid #3498db; background: #2c3e50;">
-        <h3 style="margin: 0; color: #ecf0f1; font-size: 18px; font-weight: bold;">📚 Course Videos</h3>
-        <p style="margin: 5px 0 5px 0; color: #bdc3c7; font-size: 12px;">${videos.length} videos found</p>
-        <p id="daily-stats" style="margin: 0 0 10px 0; color: #e67e22; font-size: 11px; font-weight: bold; display: none;"></p>
+        <h3 style="margin: 0; color: #ecf0f1; font-size: 18px; font-weight: bold;">📚 ${currentPageTitle}</h3>
+        <div id="content-summary" style="margin: 5px 0; color: #bdc3c7; font-size: 12px;"></div>
         <div style="display: flex; gap: 6px; margin-top: 10px;">
           <button id="next-lesson-btn" style="flex: 1; padding: 6px 10px; background: #27ae60; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">🚀 Next Lesson</button>
           <button id="course-overview-btn" style="flex: 1; padding: 6px 10px; background: #8e44ad; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">📋 Overview</button>
@@ -446,15 +665,91 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     `
     sidebar.appendChild(header)
 
-    // Video list container
+    // Content container with tabs
+    const contentContainer = document.createElement("div")
+    contentContainer.style.flex = "1"
+    contentContainer.style.display = "flex"
+    contentContainer.style.flexDirection = "column"
+
+    // Tab buttons
+    const tabContainer = document.createElement("div")
+    tabContainer.style.display = "flex"
+    tabContainer.style.background = "#34495e"
+    tabContainer.style.borderBottom = "1px solid #2c3e50"
+
+    const videoTab = document.createElement("button")
+    videoTab.innerHTML = `🎥 Videos (${videos.length})`
+    videoTab.id = "video-tab"
+    Object.assign(videoTab.style, {
+      flex: "1",
+      padding: "10px",
+      background: "#3498db",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "12px",
+      fontWeight: "bold",
+    })
+
+    const caseTab = document.createElement("button")
+    caseTab.innerHTML = `📋 Cases (${cases.length})`
+    caseTab.id = "case-tab"
+    Object.assign(caseTab.style, {
+      flex: "1",
+      padding: "10px",
+      background: "#34495e",
+      color: "#bdc3c7",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "12px",
+      fontWeight: "bold",
+    })
+
+    tabContainer.appendChild(videoTab)
+    tabContainer.appendChild(caseTab)
+    contentContainer.appendChild(tabContainer)
+
+    // Content lists
     const videoList = document.createElement("div")
     videoList.id = "video-list"
     Object.assign(videoList.style, {
       flex: "1",
       overflowY: "auto",
       padding: "10px",
+      display: "block",
     })
-    sidebar.appendChild(videoList)
+
+    const caseList = document.createElement("div")
+    caseList.id = "case-list"
+    Object.assign(caseList.style, {
+      flex: "1",
+      overflowY: "auto",
+      padding: "10px",
+      display: "none",
+    })
+
+    contentContainer.appendChild(videoList)
+    contentContainer.appendChild(caseList)
+    sidebar.appendChild(contentContainer)
+
+    // Tab switching functionality
+    videoTab.addEventListener("click", () => {
+      videoTab.style.background = "#3498db"
+      videoTab.style.color = "white"
+      caseTab.style.background = "#34495e"
+      caseTab.style.color = "#bdc3c7"
+      videoList.style.display = "block"
+      caseList.style.display = "none"
+    })
+
+    caseTab.addEventListener("click", () => {
+      caseTab.style.background = "#3498db"
+      caseTab.style.color = "white"
+      videoTab.style.background = "#34495e"
+      videoTab.style.color = "#bdc3c7"
+      videoList.style.display = "none"
+      caseList.style.display = "block"
+    })
 
     // Toggle button
     const toggleBtn = document.createElement("button")
@@ -491,6 +786,16 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
 
     sidebar.appendChild(toggleBtn)
 
+    // Add daily stats section (above footer)
+    const statsSection = document.createElement("div")
+    statsSection.innerHTML = `
+      <div style="padding: 12px 15px; border-top: 1px solid #34495e; background: #2c3e50;">
+        <h4 style="margin: 0 0 8px 0; color: #3498db; font-size: 12px; font-weight: bold; text-align: center;">📊 Your Study Stats</h4>
+        <p id="daily-stats" style="margin: 0; color: #e67e22; font-size: 11px; font-weight: bold; text-align: center; display: block;"></p>
+      </div>
+    `
+    sidebar.appendChild(statsSection)
+
     // Add attribution footer
     const footer = document.createElement("div")
     footer.innerHTML = `
@@ -503,7 +808,124 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     sidebar.appendChild(footer)
 
     document.body.appendChild(sidebar)
-    return { sidebar, videoList }
+    return { sidebar, videoList, caseList }
+  }
+
+  // Create case item in sidebar
+  function createCaseItem(caseObj, index) {
+    const item = document.createElement("div")
+    item.className = "case-item"
+    item.dataset.caseId = caseObj.id
+
+    const isViewed = viewedCases.has(caseObj.id)
+
+    Object.assign(item.style, {
+      margin: "8px 0",
+      padding: "12px",
+      background: "#34495e",
+      borderRadius: "8px",
+      border: "2px solid transparent",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    })
+
+    item.innerHTML = `
+      <div style="display: flex; justify-content: between; align-items: flex-start; margin-bottom: 8px;">
+        <div style="flex: 1;">
+          <div class="case-title" style="color: #ecf0f1; font-weight: bold; font-size: 14px; line-height: 1.3;">${
+            caseObj.title
+          }</div>
+          <div class="case-info" style="color: #95a5a6; font-size: 11px; margin-top: 2px;">
+            ${caseObj.modality} • Case ${index + 1}
+          </div>
+        </div>
+        <div class="checkmark-container" style="margin-left: 8px; font-size: 16px;">
+          ${isViewed ? "✅" : "🔍"}
+        </div>
+      </div>
+      <div class="case-controls" style="display: flex; gap: 4px; flex-wrap: wrap;">
+        <button class="view-btn" style="flex: 1; min-width: 80px; padding: 4px 8px; background: #3498db; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">👁️ View Case</button>
+        <button class="mark-viewed-btn" style="flex: 1; min-width: 80px; padding: 4px 8px; background: ${
+          isViewed ? "#27ae60" : "#95a5a6"
+        }; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">${
+      isViewed ? "✅ Viewed" : "✓ Mark Viewed"
+    }</button>
+      </div>
+    `
+
+    // Add event listeners
+    const viewBtn = item.querySelector(".view-btn")
+    const markViewedBtn = item.querySelector(".mark-viewed-btn")
+
+    // Scroll to case when clicked
+    item.addEventListener("click", e => {
+      if (e.target.tagName !== "BUTTON") {
+        caseObj.element.scrollIntoView({ behavior: "smooth", block: "center" })
+        setActiveCase(caseObj)
+      }
+    })
+
+    // Control button events
+    viewBtn.addEventListener("click", e => {
+      e.stopPropagation()
+      caseObj.element.scrollIntoView({ behavior: "smooth", block: "center" })
+      setActiveCase(caseObj)
+    })
+
+    markViewedBtn.addEventListener("click", e => {
+      e.stopPropagation()
+      toggleCaseViewed(caseObj, markViewedBtn, item)
+    })
+
+    return item
+  }
+
+  // Set active case
+  function setActiveCase(caseObj) {
+    if (currentActiveCase) {
+      const prevItem = document.querySelector(
+        `[data-case-id="${currentActiveCase.id}"]`
+      )
+      if (prevItem) {
+        prevItem.style.border = "2px solid transparent"
+      }
+    }
+
+    currentActiveCase = caseObj
+    const item = document.querySelector(`[data-case-id="${caseObj.id}"]`)
+    if (item) {
+      item.style.border = "2px solid #e67e22"
+    }
+  }
+
+  // Toggle case viewed status
+  function toggleCaseViewed(caseObj, button, item) {
+    const isCurrentlyViewed = viewedCases.has(caseObj.id)
+
+    if (isCurrentlyViewed) {
+      viewedCases.delete(caseObj.id)
+      button.textContent = "✓ Mark Viewed"
+      button.style.background = "#95a5a6"
+      const checkmark = item.querySelector(".checkmark-container")
+      if (checkmark) {
+        checkmark.textContent = "🔍"
+      }
+    } else {
+      viewedCases.add(caseObj.id)
+      button.textContent = "✅ Viewed"
+      button.style.background = "#27ae60"
+      const checkmark = item.querySelector(".checkmark-container")
+      if (checkmark) {
+        checkmark.textContent = "✅"
+      }
+
+      // Track case statistics only when marking as viewed
+      updateTodayCaseStats()
+      updateDailyStatsDisplay()
+    }
+
+    saveVideoData() // Also saves case data
+    updateContentSummary()
   }
 
   // Create video item in sidebar
@@ -730,8 +1152,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
         "#radiopaedia-sidebar h3"
       ).nextElementSibling
       if (header) {
-        const currentPageWatched = getCurrentPageWatchedCount()
-        header.textContent = `${videos.length} videos found • ${currentPageWatched}/${videos.length} watched`
+        updateContentSummary()
       }
     }
   }
@@ -749,9 +1170,33 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       'iframe[src*="player.vimeo.com/video/"]'
     )
 
-    if (iframes.length === 0) return
+    // Find all case sections
+    const caseSections = document.querySelectorAll(
+      ".case-section.case-study.well.case-viewer-2022"
+    )
 
-    // Create video objects
+    if (iframes.length === 0 && caseSections.length === 0) return
+
+    // Process case sections first
+    caseSections.forEach((caseSection, index) => {
+      const caseId = getCaseId(caseSection)
+      if (caseId) {
+        const title = getCaseTitle(caseSection, index)
+        const modality = getCaseModality(caseSection)
+
+        const caseObj = {
+          id: caseId,
+          title: title,
+          modality: modality,
+          element: caseSection,
+          index: index,
+        }
+
+        cases.push(caseObj)
+      }
+    })
+
+    // Process video iframes
     iframes.forEach((iframe, index) => {
       const videoId = getVideoId(iframe)
       if (videoId) {
@@ -846,8 +1291,11 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
 
         // Autoplay first video if enabled
         if (AUTOPLAY_FIRST_VIDEO && index === 0) {
-          player.setMuted(false).catch(() => {})
-          player.play().catch(() => {})
+          // Play first, then unmute for reliability
+          player
+            .play()
+            .then(() => player.setMuted(false))
+            .catch(() => {})
         }
 
         // Initial video setup
@@ -856,7 +1304,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     })
 
     // Create sidebar
-    const { sidebar, videoList } = createSidebar()
+    const { sidebar, videoList, caseList } = createSidebar()
 
     // Add event listeners for header buttons
     const nextLessonBtn = sidebar.querySelector("#next-lesson-btn")
@@ -896,15 +1344,30 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
       videoList.appendChild(videoItem)
     })
 
-    // Set first video as active
+    // Populate case list
+    cases.forEach((caseObj, index) => {
+      const caseItem = createCaseItem(caseObj, index)
+      caseList.appendChild(caseItem)
+    })
+
+    // Set first video as active if available
     if (videos.length > 0) {
       setActiveVideo(videos[0])
     }
 
-    // Update header with actual count
-    const header = sidebar.querySelector("h3").nextElementSibling
-    const currentPageWatched = getCurrentPageWatchedCount()
-    header.textContent = `${videos.length} videos found • ${currentPageWatched}/${videos.length} watched`
+    // Set first case as active if available and no videos
+    if (cases.length > 0 && videos.length === 0) {
+      setActiveCase(cases[0])
+    }
+
+    // Update header with actual content summary
+    updateContentSummary()
+
+    // Update tab counts
+    const videoTab = sidebar.querySelector("#video-tab")
+    const caseTab = sidebar.querySelector("#case-tab")
+    if (videoTab) videoTab.innerHTML = `🎥 Videos (${videos.length})`
+    if (caseTab) caseTab.innerHTML = `📋 Cases (${cases.length})`
 
     // Initialize daily stats display
     updateDailyStatsDisplay()
