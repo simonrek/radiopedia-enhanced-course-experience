@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name        Radiopaedia: Course Sidebar with Video Manager
 // @namespace   https://github.com/simonrek/radiopedia-enhanced-course-experience
-// @version     3.1.2
+// @version     3.1.3
 // @updateURL   https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.meta.js
 // @downloadURL https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.user.js
 // @description Enhanced course tool with sidebar listing all videos, progress tracking, and individual video controls
@@ -238,21 +238,29 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
   function updateDailyStatsDisplay() {
     const stats = getTodayStats()
     const statsElement = document.querySelector("#daily-stats")
-    if (statsElement && (stats.videosWatched > 0 || stats.casesViewed > 0)) {
-      const timeText = formatTimeWithHours(stats.totalTimeWatched)
-      const parts = []
 
-      if (stats.videosWatched > 0) {
-        parts.push(`${stats.videosWatched} videos`)
-      }
-      if (stats.casesViewed > 0) {
-        parts.push(`${stats.casesViewed} cases`)
+    if (statsElement) {
+      // Always show the stats section, even if no activity today
+      if (stats.videosWatched > 0 || stats.casesViewed > 0) {
+        const timeText = formatTimeWithHours(stats.totalTimeWatched)
+        const parts = []
+
+        if (stats.videosWatched > 0) {
+          parts.push(`${stats.videosWatched} videos`)
+        }
+        if (stats.casesViewed > 0) {
+          parts.push(`${stats.casesViewed} cases`)
+        }
+
+        const content = parts.join(" • ")
+        statsElement.innerHTML = `📈 Today: ${content}${
+          stats.videosWatched > 0 ? ` • ${timeText} watched` : ""
+        } <span style="cursor: pointer; color: #3498db; font-weight: bold;">📊 View Stats</span>`
+      } else {
+        // Show placeholder when no activity today
+        statsElement.innerHTML = `📈 Today: No activity yet <span style="cursor: pointer; color: #3498db; font-weight: bold;">📊 View Stats</span>`
       }
 
-      const content = parts.join(" • ")
-      statsElement.innerHTML = `📈 Today: ${content}${
-        stats.videosWatched > 0 ? ` • ${timeText} watched` : ""
-      } <span style="cursor: pointer; color: #3498db; font-weight: bold;">🤓 stats</span>`
       statsElement.style.display = "block"
 
       // Add click listener to the stats element
@@ -528,6 +536,85 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     )
   }
 
+  // Get current page title from various sources
+  function getCurrentPageTitle() {
+    // Method 1: Try to find the current lesson in the course overview (marked with bold text)
+    // Look for patterns like the one the user provided
+    const currentLessonSelectors = [
+      'li span[style*="color:#000000"] b',
+      'li span[style*="color: #000000"] b',
+      '.course-overview li span[style*="color:#000000"] b',
+      '.course-overview li span[style*="color: #000000"] b',
+      '.sidebar li span[style*="color:#000000"] b',
+      '.sidebar li span[style*="color: #000000"] b',
+    ]
+
+    for (const selector of currentLessonSelectors) {
+      const element = document.querySelector(selector)
+      if (element && element.textContent.trim()) {
+        return element.textContent.trim()
+      }
+    }
+
+    // Method 2: Try to find the page title in the main content area
+    const mainTitleSelectors = [
+      "h1",
+      ".page-title",
+      ".lesson-title",
+      ".main-content h1",
+      ".content h1",
+      ".course-content h1",
+    ]
+
+    for (const selector of mainTitleSelectors) {
+      const element = document.querySelector(selector)
+      if (element && element.textContent.trim()) {
+        return element.textContent.trim()
+      }
+    }
+
+    // Method 3: Try to extract from page URL or breadcrumbs
+    const breadcrumbSelectors = [
+      ".breadcrumb li:last-child",
+      ".breadcrumb a:last-child",
+      ".breadcrumbs li:last-child",
+      ".breadcrumbs a:last-child",
+    ]
+
+    for (const selector of breadcrumbSelectors) {
+      const element = document.querySelector(selector)
+      if (element && element.textContent.trim()) {
+        return element.textContent.trim()
+      }
+    }
+
+    // Method 4: Extract from page title tag as fallback
+    const pageTitle = document.title
+    if (pageTitle && pageTitle.includes(" - ")) {
+      const titlePart = pageTitle.split(" - ")[0]
+      if (titlePart && titlePart.trim()) {
+        return titlePart.trim()
+      }
+    }
+
+    // Method 5: Try to extract from URL path
+    const path = window.location.pathname
+    if (path.includes("/pages/")) {
+      const pathParts = path.split("/")
+      const courseName = pathParts.find(
+        part => part && !part.includes("pages") && !part.includes("courses")
+      )
+      if (courseName) {
+        return courseName
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, l => l.toUpperCase())
+      }
+    }
+
+    // Fallback: Generic title
+    return "Course Content"
+  }
+
   // Update content summary in header
   function updateContentSummary() {
     const summaryElement = document.querySelector("#content-summary")
@@ -558,12 +645,12 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     })
 
     // Header
+    const currentPageTitle = getCurrentPageTitle()
     const header = document.createElement("div")
     header.innerHTML = `
       <div style="padding: 20px; border-bottom: 2px solid #3498db; background: #2c3e50;">
-        <h3 style="margin: 0; color: #ecf0f1; font-size: 18px; font-weight: bold;">📚 Course Content</h3>
+        <h3 style="margin: 0; color: #ecf0f1; font-size: 18px; font-weight: bold;">📚 ${currentPageTitle}</h3>
         <div id="content-summary" style="margin: 5px 0; color: #bdc3c7; font-size: 12px;"></div>
-        <p id="daily-stats" style="margin: 0 0 10px 0; color: #e67e22; font-size: 11px; font-weight: bold; display: none;"></p>
         <div style="display: flex; gap: 6px; margin-top: 10px;">
           <button id="next-lesson-btn" style="flex: 1; padding: 6px 10px; background: #27ae60; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">🚀 Next Lesson</button>
           <button id="course-overview-btn" style="flex: 1; padding: 6px 10px; background: #8e44ad; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">📋 Overview</button>
@@ -692,6 +779,15 @@ const SIDEBAR_OPEN_BY_DEFAULT = true // Set to true to have sidebar open when pa
     }
 
     sidebar.appendChild(toggleBtn)
+
+    // Add daily stats section (above footer)
+    const statsSection = document.createElement("div")
+    statsSection.innerHTML = `
+      <div style="padding: 10px 15px; border-top: 1px solid #34495e; background: #2c3e50;">
+        <p id="daily-stats" style="margin: 0; color: #e67e22; font-size: 11px; font-weight: bold; text-align: center; display: block;"></p>
+      </div>
+    `
+    sidebar.appendChild(statsSection)
 
     // Add attribution footer
     const footer = document.createElement("div")

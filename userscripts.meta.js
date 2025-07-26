@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name        Radiopaedia: Course Sidebar with Video Manager
 // @namespace   https://github.com/simonrek/radiopedia-enhanced-course-experience
-// @version     3.1.2
+// @version     3.1.3
 // @updateURL   https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.meta.js
 // @downloadURL https://raw.githubusercontent.com/simonrek/radiopedia-enhanced-course-experience/refs/heads/main/userscripts.user.js
 // @description Enhanced course tool with sidebar listing all videos, progress tracking, and individual video controls
