@@ -31,7 +31,7 @@ An advanced userscript that revolutionizes the Radiopaedia learning experience w
 ## 📸 Preview
 
 <div align="center">
-  <img src="assets/Radiopedia enhanced course player screen v3.1 screen-shot" alt="Radiopaedia Enhanced Course Player UI" width="600"/>
+  <img src="assets/Radiopedia enhanced course player screen v3.1 screen-shot.png" alt="Radiopaedia Enhanced Course Player UI" width="600"/>
   <p><em>The enhanced video management sidebar in action on a Radiopaedia course page</em></p>
 </div>
 
