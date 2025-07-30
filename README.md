@@ -6,9 +6,11 @@ An advanced userscript that revolutionizes the Radiopaedia learning experience w
 
 ![Version](https://img.shields.io/badge/version-3.1.4-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Safari](https://img.shields.io/badge/Safari-Userscripts-orange.svg)
-![Chrome](https://img.shields.io/badge/Chrome-Tampermonkey-red.svg)
+![Safari](https://img.shields.io/badge/Safari-Only-orange.svg)
+![Userscripts](https://img.shields.io/badge/Userscripts-Required-blue.svg)
 ![Auto-Update](https://img.shields.io/badge/Auto--Update-Enabled-green.svg)
+
+> **⚠️ Safari Only**: This userscript is exclusively designed for Safari with the Userscripts extension. Other browsers are not yet supported.
 
 ## Quick Start
 
@@ -177,16 +179,18 @@ The script automatically updates itself using the metadata file (`userscripts.me
 
 ### Platform Compatibility
 
+- **Safari Only**: Exclusively designed for Safari with Userscripts extension
+- **macOS**: Requires macOS 12+ (Monterey) or later
+- **iOS**: Requires iOS 15+ or later
+- **Userscripts Extension**: Required from App Store
 - **Radiopaedia**: Works on all `radiopaedia.org/courses*` pages
 - **Vimeo Integration**: Deep integration with Vimeo Player API for reliable video control
 - **Data Persistence**: Advanced localStorage implementation for robust progress tracking
-- **Browser Support**:
-  - Safari with Userscripts extension
-  - Chrome/Edge/Firefox with Tampermonkey/Greasemonkey
-  - All modern browsers with userscript manager support
 
 ### Core Technologies
 
+- **Safari WebKit**: Optimized specifically for Safari's JavaScript engine
+- **Userscripts Extension**: Deep integration with the Userscripts extension API
 - **Vimeo Player API**: Professional-grade video control and event handling
 - **Modern JavaScript**: ES6+ with async/await patterns and event-driven architecture
 - **Advanced CSS3**: Gradient backgrounds, overlay effects, blur filters, and responsive design
@@ -212,16 +216,18 @@ The script automatically updates itself using the metadata file (`userscripts.me
 
 ### Current Limitations
 
+- **Safari Only**: Designed exclusively for Safari with Userscripts extension
 - **Vimeo Dependency**: Optimized for Vimeo-embedded videos (standard on Radiopaedia)
 - **Course Pages Only**: Designed specifically for `radiopaedia.org/courses*` pages
-- **Modern Browser Requirement**: Requires ES6+ support for full functionality
+- **Modern Safari Required**: Requires Safari with ES6+ support (macOS 12+/iOS 15+)
 
 ### Common Issues
 
-- **Script Not Loading**: Ensure userscript manager is enabled and script is active
-- **Statistics Not Updating**: Check browser console for any localStorage errors
+- **Script Not Loading**: Ensure Userscripts extension is enabled in Safari preferences
+- **Statistics Not Updating**: Check Safari's Web Inspector console for localStorage errors
 - **Auto-Update Issues**: Verify GitHub access isn't blocked by firewall/proxy
 - **Video Controls Missing**: Confirm Vimeo player is fully loaded before interaction
+- **Extension Not Working**: Ensure Userscripts extension is installed from App Store and enabled
 
 ## 🤝 Contributing
 

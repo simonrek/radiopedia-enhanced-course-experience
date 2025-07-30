@@ -2,44 +2,35 @@
 
 # 📚 Radiopaedia Enhanced Course Experience - Installation Guide
 
-## 🚀 Quick Installation (Recommended)
+> **⚠️ Important Notice**: This userscript is designed and tested exclusively for Safari with the Userscripts extension. Other browsers and userscript managers are not supported.
 
-### Auto-Updating Installation
+## 🍎 Safari Installation (Only Supported Browser)
 
-1. **Install a userscript manager:**
+### Quick Installation
 
-   - **Safari**: Install [Userscripts](https://apps.apple.com/app/userscripts/id1463298887) from the App Store
-   - **Chrome/Edge**: Install [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
-   - **Firefox**: Install [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) or [Tampermonkey](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
+1. **Install the Userscripts extension:**
 
-2. **Install the script:**
-   - Download or copy the script from [`userscripts.js`](userscripts.js)
-   - Open your userscript manager and create a new script
+   - Download [Userscripts](https://apps.apple.com/app/userscripts/id1463298887) from the App Store
+
+2. **Enable the extension:**
+
+   - Open Safari → Preferences → Extensions
+   - Enable the Userscripts extension
+
+3. **Install the script:**
+   - Click the Userscripts icon in Safari's toolbar
+   - Select "Create New Userscript"
+   - Copy the content from [`userscripts.js`](userscripts.js)
    - Paste the code and save
-   - The auto-update system will then handle future updates automatically
+   - The auto-update system will handle future updates automatically
 
-## 🔧 Manual Installation
+### ⚙️ Configuration & Settings
 
-### Safari Users (Alternative Method)
+### System Requirements
 
-1. **Download Userscripts** from the App Store
-2. **Enable** it in Safari → Preferences → Extensions
-3. **Click** Userscripts icon → "Create New Userscript"
-4. **Copy** the content from [`userscripts.js`](userscripts.js)
-5. **Paste** and save the script
-6. **Enable** auto-updates in Userscripts settings
-
-### Chrome/Edge/Firefox Users (Alternative Method)
-
-1. **Install Tampermonkey** or **Greasemonkey** extension
-2. **Click** extension icon → "Create a new script"
-3. **Copy** the content from [`userscripts.js`](userscripts.js)
-4. **Paste** and save (Ctrl+S)
-5. **Enable** auto-updates in extension settings
-
-## ⚙️ Configuration & Settings
-
-## ⚙️ Configuration & Settings
+- **Safari**: macOS 12+ or iOS 15+
+- **Userscripts Extension**: Required from App Store
+- **JavaScript**: Must be enabled in Safari
 
 ### Customizable Options
 
@@ -56,7 +47,7 @@ const SIDEBAR_OPEN_BY_DEFAULT = false // Auto-open sidebar when page loads
 
 ### Auto-Update System
 
-The script includes automatic updates via GitHub:
+The script includes automatic updates via GitHub (Safari/Userscripts only):
 
 - ✅ **Latest features** delivered automatically
 - ✅ **Bug fixes** and improvements
@@ -67,7 +58,7 @@ The script includes automatic updates via GitHub:
 
 ### Getting Started
 
-1. **Navigate** to any Radiopaedia course page (`radiopaedia.org/courses/*`)
+1. **Navigate** to any Radiopaedia course page (`radiopaedia.org/courses/*`) in Safari
 2. **Look** for the enhanced sidebar that automatically appears on the right
 3. **Explore** the Videos and Cases tabs
 4. **Watch** your statistics update in real-time at the bottom!
@@ -104,30 +95,33 @@ The script includes automatic updates via GitHub:
 
 ### Common Issues
 
-**Script not working?**
+**Script not working in Safari?**
 
-- Ensure userscript manager is enabled and active
-- Check that script is enabled in your manager
+- Ensure Userscripts extension is enabled in Safari Preferences → Extensions
+- Check that the script is enabled in the Userscripts extension
 - Refresh the Radiopaedia course page
 
 **Statistics not updating?**
 
-- Check browser console for localStorage errors
+- Check Safari's Web Inspector console for localStorage errors
 - Ensure you're on a `radiopaedia.org/courses/*` page
-- Try clearing browser cache and reload
+- Try clearing Safari cache and reload
 
 **Auto-updates not working?**
 
-- Verify GitHub access isn't blocked by firewall
-- Check userscript manager auto-update settings
-- Manually check for updates in your manager
+- Verify GitHub access isn't blocked by firewall or network restrictions
+- Check Userscripts extension auto-update settings
+- Manually check for updates in the Userscripts extension
 
-### Browser Compatibility
+### System Requirements
 
-- **Safari**: Requires iOS 15+ / macOS 12+ with Userscripts extension
-- **Chrome**: Works with Tampermonkey on Chrome 90+
-- **Firefox**: Compatible with Tampermonkey/Greasemonkey
-- **Edge**: Full support with Tampermonkey extension
+- **Safari**: macOS 12+ (Monterey) or iOS 15+
+- **Userscripts Extension**: Latest version from App Store
+- **JavaScript**: Must be enabled in Safari settings
+
+### Not Using Safari?
+
+This userscript is exclusively designed and tested for Safari with the Userscripts extension. Other browsers are not supported due to compatibility and testing limitations.
 
 ## 🎥 Video Guide
 
@@ -144,4 +138,4 @@ Need assistance? Get help here:
 
 ---
 
-**Ready to enhance your medical education journey? Install now and start learning smarter! 🚀**
+**Ready to enhance your medical education journey with Safari? Install now and start learning smarter! 🚀**
